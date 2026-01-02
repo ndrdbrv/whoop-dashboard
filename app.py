@@ -554,6 +554,35 @@ DASHBOARD_HTML = """
             color: var(--white-20);
         }
         
+        .log-history {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .log-history-item {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.04);
+            border-radius: 14px;
+            padding: 14px;
+        }
+        
+        .log-history-date {
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--white-40);
+            margin-bottom: 8px;
+        }
+        
+        .log-history-text {
+            font-size: 13px;
+            color: var(--white-60);
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+        
         .calendar-row {
             display: flex;
             gap: 10px;
@@ -657,6 +686,47 @@ DASHBOARD_HTML = """
         
         // Load saved log on page load
         document.addEventListener('DOMContentLoaded', showSavedLog);
+        
+        function toggleHistory() {
+            const historyDiv = document.getElementById('logHistory');
+            const btnText = document.getElementById('historyBtnText');
+            
+            if (historyDiv.style.display === 'none') {
+                showHistory();
+                historyDiv.style.display = 'flex';
+                btnText.textContent = 'Hide Workout History';
+            } else {
+                historyDiv.style.display = 'none';
+                btnText.textContent = 'Show Workout History';
+            }
+        }
+        
+        function showHistory() {
+            const logs = JSON.parse(localStorage.getItem('workoutLogs') || '{}');
+            const historyDiv = document.getElementById('logHistory');
+            
+            const sortedDates = Object.keys(logs)
+                .filter(d => d !== today)
+                .sort((a, b) => new Date(b) - new Date(a))
+                .slice(0, 14); // Last 14 days
+            
+            if (sortedDates.length === 0) {
+                historyDiv.innerHTML = '<div style="text-align: center; color: var(--white-20); padding: 20px;">No past workouts logged yet</div>';
+                return;
+            }
+            
+            historyDiv.innerHTML = sortedDates.map(date => {
+                const log = logs[date];
+                const dateObj = new Date(date + 'T12:00:00');
+                const formatted = dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                return `
+                    <div class="log-history-item">
+                        <div class="log-history-date">${formatted}</div>
+                        <div class="log-history-text">${log.text.replace(/\n/g, '<br>')}</div>
+                    </div>
+                `;
+            }).join('');
+        }
     </script>
 </head>
 <body>
@@ -715,6 +785,12 @@ Add notes, RPE, how it felt..."></textarea>
                     <button class="btn" onclick="saveLog()">Save Workout</button>
                 </div>
             </div>
+            
+            <!-- Past Logs -->
+            <div id="logHistory" class="log-history" style="display: none; margin-top: 16px;"></div>
+            <button class="btn btn-secondary" style="width: 100%; margin-top: 12px;" onclick="toggleHistory()">
+                <span id="historyBtnText">Show Workout History</span>
+            </button>
         </div>
         
         <div class="section">
