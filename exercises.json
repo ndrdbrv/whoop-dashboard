@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "modifiers": {
+    "load_type": ["bodyweight", "dumbbell", "barbell", "kettlebell", "cable", "machine", "bands", "sandbag", "medicine_ball", "trap_bar"],
+    "tempo": ["normal", "slow", "paused", "eccentric_emphasis", "explosive"],
+    "rpe": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+  },
+  "categories": [
+    {
+      "id": "lower_compound",
+      "name": "Lower Body - Compound",
+      "exercises": [
+        "back_squat", "front_squat", "goblet_squat", "box_squat",
+        "forward_lunge", "reverse_lunge", "walking_lunge", "bulgarian_split_squat",
+        "conventional_deadlift", "sumo_deadlift", "romanian_deadlift", "trap_bar_deadlift",
+        "step_up", "lateral_step_up"
+      ]
+    },
+    {
+      "id": "lower_isolation",
+      "name": "Lower Body - Isolation",
+      "exercises": [
+        "leg_extension", "lying_hamstring_curl", "seated_hamstring_curl",
+        "hip_thrust", "glute_bridge", "single_leg_hip_thrust",
+        "standing_calf_raise", "seated_calf_raise",
+        "hip_adduction_machine", "hip_abduction_machine"
+      ]
+    },
+    {
+      "id": "upper_push",
+      "name": "Upper Body - Push",
+      "exercises": [
+        "bench_press", "incline_bench_press", "decline_bench_press", "dumbbell_bench_press",
+        "push_up", "floor_press", "close_grip_bench_press", "dip",
+        "overhead_press", "push_press", "arnold_press",
+        "dumbbell_fly", "cable_fly", "pec_deck"
+      ]
+    },
+    {
+      "id": "upper_pull",
+      "name": "Upper Body - Pull",
+      "exercises": [
+        "pull_up", "chin_up", "lat_pulldown", "assisted_pull_up",
+        "barbell_row", "dumbbell_row", "cable_row", "chest_supported_row", "inverted_row",
+        "face_pull", "band_pull_apart", "straight_arm_pulldown"
+      ]
+    },
+    {
+      "id": "shoulders_arms",
+      "name": "Shoulders & Arms",
+      "exercises": [
+        "lateral_raise", "front_raise", "rear_delt_fly", "shoulder_shrug", "upright_row",
+        "barbell_curl", "dumbbell_curl", "hammer_curl", "preacher_curl", "cable_curl",
+        "skull_crusher", "triceps_pushdown", "overhead_triceps_extension",
+        "wrist_curl", "reverse_wrist_curl", "farmers_carry"
+      ]
+    },
+    {
+      "id": "core",
+      "name": "Core",
+      "exercises": [
+        "plank", "ab_wheel_rollout", "dead_bug",
+        "pallof_press", "cable_anti_rotation_hold",
+        "crunch", "hanging_leg_raise", "sit_up", "v_up",
+        "russian_twist", "cable_chop"
+      ]
+    },
+    {
+      "id": "climbing_specific",
+      "name": "Climbing-Specific / Grip",
+      "exercises": [
+        "dead_hang", "max_hang", "repeater_hang",
+        "half_crimp_hang", "open_hand_hang", "full_crimp_hang",
+        "one_arm_hang", "assisted_one_arm_hang",
+        "campus_ladder", "campus_doubles",
+        "limit_bouldering", "system_board_circuits"
+      ]
+    },
+    {
+      "id": "conditioning",
+      "name": "Conditioning / Cardio",
+      "exercises": [
+        "rower", "assault_bike", "cross_trainer", "treadmill",
+        "easy_run", "tempo_run", "interval_run", "hill_sprint",
+        "burpee", "mountain_climber", "jump_squat", "jump_rope"
+      ]
+    },
+    {
+      "id": "power_olympic",
+      "name": "Power / Olympic",
+      "exercises": [
+        "power_clean", "clean_and_jerk", "snatch", "hang_clean",
+        "kettlebell_swing", "medicine_ball_throw", "medicine_ball_slam"
+      ]
+    },
+    {
+      "id": "recovery",
+      "name": "Recovery / Regen",
+      "exercises": [
+        "sauna", "cold_plunge", "contrast_therapy",
+        "zone2_cardio", "walking", "yoga", "breathwork", "mobility_flow"
+      ]
+    }
+  ]
+}
+

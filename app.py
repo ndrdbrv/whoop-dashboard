@@ -510,7 +510,7 @@ DASHBOARD_HTML = """
             margin-top: 12px;
         }
         
-        /* Workout Log */
+        /* Exercise Logger */
         .log-card {
             background: rgba(20,20,22,0.85);
             border: 1px solid rgba(255,255,255,0.04);
@@ -519,38 +519,119 @@ DASHBOARD_HTML = """
             backdrop-filter: blur(20px);
         }
         
-        .log-input {
-            width: 100%;
-            min-height: 120px;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 12px;
-            padding: 14px;
-            color: var(--white);
-            font-family: inherit;
-            font-size: 13px;
-            line-height: 1.6;
-            resize: vertical;
-            margin-bottom: 12px;
-        }
-        
-        .log-input::placeholder {
-            color: var(--white-20);
-        }
-        
-        .log-input:focus {
-            outline: none;
-            border-color: rgba(255,255,255,0.15);
-        }
-        
-        .log-actions {
+        .exercise-row {
             display: flex;
-            gap: 10px;
+            gap: 8px;
+            margin-bottom: 10px;
         }
         
-        .log-actions .btn {
+        .ex-select {
+            flex: 1;
+            padding: 12px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            color: var(--white);
+            font-size: 13px;
+            cursor: pointer;
+            appearance: none;
+        }
+        
+        .ex-select-wide { flex: 2; }
+        
+        .ex-select option {
+            background: #1a1a1a;
+            color: white;
+        }
+        
+        .ex-input {
+            flex: 1;
+            padding: 12px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            color: var(--white);
+            font-size: 13px;
+            text-align: center;
+        }
+        
+        .ex-input::placeholder { color: var(--white-20); }
+        .ex-input:focus, .ex-select:focus { outline: none; border-color: rgba(255,255,255,0.2); }
+        
+        .ex-add-btn {
+            flex: 0 0 48px;
+            padding: 12px;
+            font-size: 18px;
+            font-weight: 300;
+        }
+        
+        .optional-toggle {
+            font-size: 12px;
+            color: var(--white-40);
+            cursor: pointer;
+            padding: 8px 0;
+            margin-bottom: 8px;
+        }
+        
+        .optional-toggle:hover { color: var(--white-60); }
+        
+        .optional-fields { margin-bottom: 12px; }
+        
+        .ex-notes {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            color: var(--white);
+            font-size: 13px;
+            font-family: inherit;
+            resize: none;
+        }
+        
+        .ex-notes::placeholder { color: var(--white-20); }
+        
+        .exercise-list {
+            margin-top: 16px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding-top: 12px;
+        }
+        
+        .exercise-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        
+        .exercise-item:last-child { border-bottom: none; }
+        
+        .exercise-info {
             flex: 1;
         }
+        
+        .exercise-name {
+            font-size: 14px;
+            color: var(--white);
+            margin-bottom: 2px;
+        }
+        
+        .exercise-details {
+            font-size: 12px;
+            color: var(--white-40);
+        }
+        
+        .exercise-delete {
+            background: none;
+            border: none;
+            color: var(--white-20);
+            cursor: pointer;
+            padding: 8px;
+            font-size: 16px;
+        }
+        
+        .exercise-delete:hover { color: #f87171; }
         
         .btn-secondary {
             background: transparent;
@@ -560,40 +641,6 @@ DASHBOARD_HTML = """
         
         .btn-secondary:hover {
             background: rgba(255,255,255,0.05);
-        }
-        
-        .log-saved {
-            background: rgba(74, 222, 128, 0.1);
-            border: 1px solid rgba(74, 222, 128, 0.2);
-            border-radius: 12px;
-            padding: 14px;
-            margin-bottom: 12px;
-            font-size: 13px;
-            color: var(--white-60);
-            white-space: pre-wrap;
-            line-height: 1.6;
-        }
-        
-        .log-saved-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-        }
-        
-        .log-saved-title {
-            font-size: 11px;
-            font-weight: 500;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            color: #4ade80;
-        }
-        
-        .log-saved-time {
-            font-size: 11px;
-            color: var(--white-20);
         }
         
         .log-history {
@@ -681,53 +728,172 @@ DASHBOARD_HTML = """
             window.open(url, '_blank');
         }
         
-        // Workout Log Functions
+        // Exercise Database
+        const exerciseDB = {
+            categories: [
+                { id: "lower_compound", name: "Lower Body - Compound", exercises: ["back_squat", "front_squat", "goblet_squat", "box_squat", "forward_lunge", "reverse_lunge", "walking_lunge", "bulgarian_split_squat", "conventional_deadlift", "sumo_deadlift", "romanian_deadlift", "trap_bar_deadlift", "step_up", "lateral_step_up"] },
+                { id: "lower_isolation", name: "Lower Body - Isolation", exercises: ["leg_extension", "lying_hamstring_curl", "seated_hamstring_curl", "hip_thrust", "glute_bridge", "single_leg_hip_thrust", "standing_calf_raise", "seated_calf_raise", "hip_adduction_machine", "hip_abduction_machine"] },
+                { id: "upper_push", name: "Upper Body - Push", exercises: ["bench_press", "incline_bench_press", "decline_bench_press", "dumbbell_bench_press", "push_up", "floor_press", "close_grip_bench_press", "dip", "overhead_press", "push_press", "arnold_press", "dumbbell_fly", "cable_fly", "pec_deck"] },
+                { id: "upper_pull", name: "Upper Body - Pull", exercises: ["pull_up", "chin_up", "lat_pulldown", "assisted_pull_up", "barbell_row", "dumbbell_row", "cable_row", "chest_supported_row", "inverted_row", "face_pull", "band_pull_apart", "straight_arm_pulldown"] },
+                { id: "shoulders_arms", name: "Shoulders & Arms", exercises: ["lateral_raise", "front_raise", "rear_delt_fly", "shoulder_shrug", "upright_row", "barbell_curl", "dumbbell_curl", "hammer_curl", "preacher_curl", "cable_curl", "skull_crusher", "triceps_pushdown", "overhead_triceps_extension", "wrist_curl", "reverse_wrist_curl", "farmers_carry"] },
+                { id: "core", name: "Core", exercises: ["plank", "ab_wheel_rollout", "dead_bug", "pallof_press", "cable_anti_rotation_hold", "crunch", "hanging_leg_raise", "sit_up", "v_up", "russian_twist", "cable_chop"] },
+                { id: "climbing_specific", name: "Climbing-Specific", exercises: ["dead_hang", "max_hang", "repeater_hang", "half_crimp_hang", "open_hand_hang", "full_crimp_hang", "one_arm_hang", "assisted_one_arm_hang", "campus_ladder", "campus_doubles", "limit_bouldering", "system_board_circuits"] },
+                { id: "conditioning", name: "Conditioning", exercises: ["rower", "assault_bike", "cross_trainer", "treadmill", "easy_run", "tempo_run", "interval_run", "hill_sprint", "burpee", "mountain_climber", "jump_squat", "jump_rope"] },
+                { id: "recovery", name: "Recovery", exercises: ["sauna", "cold_plunge", "contrast_therapy", "zone2_cardio", "walking", "yoga", "breathwork", "mobility_flow"] }
+            ]
+        };
+        
         const today = new Date().toISOString().split('T')[0];
         
-        function saveLog() {
-            const log = document.getElementById('workoutLog').value.trim();
-            if (!log) return;
+        function formatExerciseName(name) {
+            return name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        }
+        
+        function initExerciseDB() {
+            const catSelect = document.getElementById('categorySelect');
+            if (!catSelect) return;
             
-            const logs = JSON.parse(localStorage.getItem('workoutLogs') || '{}');
-            logs[today] = {
-                text: log,
+            exerciseDB.categories.forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat.id;
+                opt.textContent = cat.name;
+                catSelect.appendChild(opt);
+            });
+        }
+        
+        function updateExercises() {
+            const catId = document.getElementById('categorySelect').value;
+            const exSelect = document.getElementById('exerciseSelect');
+            exSelect.innerHTML = '<option value="">Exercise</option>';
+            
+            if (!catId) return;
+            
+            const cat = exerciseDB.categories.find(c => c.id === catId);
+            if (cat) {
+                cat.exercises.forEach(ex => {
+                    const opt = document.createElement('option');
+                    opt.value = ex;
+                    opt.textContent = formatExerciseName(ex);
+                    exSelect.appendChild(opt);
+                });
+            }
+        }
+        
+        function toggleOptional() {
+            const fields = document.getElementById('optionalFields');
+            const icon = document.getElementById('optionalIcon');
+            if (fields.style.display === 'none') {
+                fields.style.display = 'block';
+                icon.textContent = '▾';
+            } else {
+                fields.style.display = 'none';
+                icon.textContent = '▸';
+            }
+        }
+        
+        function addExercise() {
+            const exercise = document.getElementById('exerciseSelect').value;
+            const weight = document.getElementById('weightInput').value;
+            const sets = document.getElementById('setsInput').value;
+            const reps = document.getElementById('repsInput').value;
+            const rpe = document.getElementById('rpeSelect').value;
+            const tempo = document.getElementById('tempoSelect').value;
+            const notes = document.getElementById('notesInput').value;
+            
+            if (!exercise) { alert('Select an exercise'); return; }
+            
+            const logs = JSON.parse(localStorage.getItem('exerciseLogs') || '{}');
+            if (!logs[today]) logs[today] = { exercises: [], notes: '' };
+            
+            logs[today].exercises.push({
+                name: exercise,
+                weight: weight ? parseFloat(weight) : null,
+                sets: sets ? parseInt(sets) : null,
+                reps: reps ? parseInt(reps) : null,
+                rpe: rpe ? parseInt(rpe) : null,
+                tempo: tempo || null,
+                notes: notes || null,
                 time: new Date().toLocaleTimeString('en-US', {hour: '2-digit', minute: '2-digit'})
-            };
-            localStorage.setItem('workoutLogs', JSON.stringify(logs));
+            });
             
-            showSavedLog();
-            document.getElementById('workoutLog').value = '';
+            localStorage.setItem('exerciseLogs', JSON.stringify(logs));
+            
+            // Clear inputs
+            document.getElementById('exerciseSelect').value = '';
+            document.getElementById('weightInput').value = '';
+            document.getElementById('setsInput').value = '';
+            document.getElementById('repsInput').value = '';
+            document.getElementById('rpeSelect').value = '';
+            document.getElementById('tempoSelect').value = '';
+            document.getElementById('notesInput').value = '';
+            
+            renderExerciseList();
         }
         
-        function clearLog() {
-            if (confirm('Clear this log?')) {
-                const logs = JSON.parse(localStorage.getItem('workoutLogs') || '{}');
-                delete logs[today];
-                localStorage.setItem('workoutLogs', JSON.stringify(logs));
-                document.getElementById('savedLog').style.display = 'none';
-                document.getElementById('workoutLog').value = '';
+        function deleteExercise(idx) {
+            const logs = JSON.parse(localStorage.getItem('exerciseLogs') || '{}');
+            if (logs[today] && logs[today].exercises) {
+                logs[today].exercises.splice(idx, 1);
+                localStorage.setItem('exerciseLogs', JSON.stringify(logs));
+                renderExerciseList();
             }
         }
         
-        function showSavedLog() {
-            const logs = JSON.parse(localStorage.getItem('workoutLogs') || '{}');
-            const todayLog = logs[today];
-            const savedDiv = document.getElementById('savedLog');
+        function renderExerciseList() {
+            const logs = JSON.parse(localStorage.getItem('exerciseLogs') || '{}');
+            const list = document.getElementById('exerciseList');
+            if (!list) return;
             
-            if (todayLog) {
-                savedDiv.innerHTML = `
-                    <div class="log-saved-header">
-                        <span class="log-saved-title">✓ Logged</span>
-                        <span class="log-saved-time">${todayLog.time}</span>
-                    </div>
-                    ${todayLog.text.replace(/\n/g, '<br>')}
-                `;
-                savedDiv.style.display = 'block';
+            const todayExercises = logs[today]?.exercises || [];
+            
+            if (todayExercises.length === 0) {
+                list.innerHTML = '<div style="text-align: center; color: var(--white-20); padding: 16px; font-size: 13px;">No exercises logged yet</div>';
+                return;
+            }
+            
+            list.innerHTML = todayExercises.map((ex, i) => {
+                const details = [];
+                if (ex.weight) details.push(ex.weight + 'kg');
+                if (ex.sets && ex.reps) details.push(ex.sets + '×' + ex.reps);
+                else if (ex.sets) details.push(ex.sets + ' sets');
+                else if (ex.reps) details.push(ex.reps + ' reps');
+                if (ex.rpe) details.push('RPE ' + ex.rpe);
+                if (ex.tempo) details.push(ex.tempo);
+                if (ex.notes) details.push('"' + ex.notes + '"');
+                
+                return '<div class="exercise-item">' +
+                    '<div class="exercise-info">' +
+                        '<div class="exercise-name">' + formatExerciseName(ex.name) + '</div>' +
+                        '<div class="exercise-details">' + (details.join(' · ') || 'No details') + '</div>' +
+                    '</div>' +
+                    '<button class="exercise-delete" onclick="deleteExercise(' + i + ')">×</button>' +
+                '</div>';
+            }).join('');
+        }
+        
+        function saveWorkoutNotes() {
+            const notes = document.getElementById('workoutNotes').value;
+            const logs = JSON.parse(localStorage.getItem('exerciseLogs') || '{}');
+            if (!logs[today]) logs[today] = { exercises: [], notes: '' };
+            logs[today].notes = notes;
+            localStorage.setItem('exerciseLogs', JSON.stringify(logs));
+            alert('Notes saved!');
+        }
+        
+        function loadWorkoutNotes() {
+            const logs = JSON.parse(localStorage.getItem('exerciseLogs') || '{}');
+            const notesField = document.getElementById('workoutNotes');
+            if (notesField && logs[today]?.notes) {
+                notesField.value = logs[today].notes;
             }
         }
         
-        // Load saved log on page load
-        document.addEventListener('DOMContentLoaded', showSavedLog);
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initExerciseDB();
+            renderExerciseList();
+            loadWorkoutNotes();
+        });
         
         // Show planned workout
         function showPlannedWorkout() {
@@ -777,13 +943,13 @@ DASHBOARD_HTML = """
         }
         
         function showHistory() {
-            const logs = JSON.parse(localStorage.getItem('workoutLogs') || '{}');
+            const logs = JSON.parse(localStorage.getItem('exerciseLogs') || '{}');
             const historyDiv = document.getElementById('logHistory');
             
             const sortedDates = Object.keys(logs)
-                .filter(d => d !== today)
+                .filter(d => d !== today && logs[d].exercises && logs[d].exercises.length > 0)
                 .sort((a, b) => new Date(b) - new Date(a))
-                .slice(0, 14); // Last 14 days
+                .slice(0, 14);
             
             if (sortedDates.length === 0) {
                 historyDiv.innerHTML = '<div style="text-align: center; color: var(--white-20); padding: 20px;">No past workouts logged yet</div>';
@@ -794,12 +960,18 @@ DASHBOARD_HTML = """
                 const log = logs[date];
                 const dateObj = new Date(date + 'T12:00:00');
                 const formatted = dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-                return `
-                    <div class="log-history-item">
-                        <div class="log-history-date">${formatted}</div>
-                        <div class="log-history-text">${log.text.replace(/\n/g, '<br>')}</div>
-                    </div>
-                `;
+                
+                const exerciseList = log.exercises.map(ex => {
+                    let line = formatExerciseName(ex.name);
+                    if (ex.weight) line += ' ' + ex.weight + 'kg';
+                    if (ex.sets && ex.reps) line += ' ' + ex.sets + '×' + ex.reps;
+                    return line;
+                }).join('<br>');
+                
+                return '<div class="log-history-item">' +
+                    '<div class="log-history-date">' + formatted + ' (' + log.exercises.length + ' exercises)</div>' +
+                    '<div class="log-history-text">' + exerciseList + (log.notes ? '<br><em>' + log.notes + '</em>' : '') + '</div>' +
+                '</div>';
             }).join('');
         }
     </script>
@@ -855,20 +1027,57 @@ DASHBOARD_HTML = """
             </div>
         </div>
         
-        <!-- Workout Log Section -->
+        <!-- Exercise Logger -->
         <div class="section">
-            <div class="section-title">Log Today's Workout</div>
+            <div class="section-title">Log Exercises</div>
             <div class="log-card">
-                <div class="log-saved" id="savedLog" style="display: none;"></div>
-                <textarea id="workoutLog" class="log-input" placeholder="Bench Press: 80kg × 8, 85kg × 6, 85kg × 6
-Incline DB: 30kg × 10 × 3
-Cable Flies: 15kg × 12 × 3
-
-Add notes, RPE, how it felt..."></textarea>
-                <div class="log-actions">
-                    <button class="btn btn-secondary" onclick="clearLog()">Clear</button>
-                    <button class="btn" onclick="saveLog()">Save Workout</button>
+                <!-- Quick Add Row -->
+                <div class="exercise-row">
+                    <select id="categorySelect" class="ex-select" onchange="updateExercises()">
+                        <option value="">Category</option>
+                    </select>
+                    <select id="exerciseSelect" class="ex-select ex-select-wide">
+                        <option value="">Exercise</option>
+                    </select>
                 </div>
+                <div class="exercise-row">
+                    <input type="number" id="weightInput" class="ex-input" placeholder="kg">
+                    <input type="number" id="setsInput" class="ex-input" placeholder="sets">
+                    <input type="number" id="repsInput" class="ex-input" placeholder="reps">
+                    <button class="btn ex-add-btn" onclick="addExercise()">+</button>
+                </div>
+                
+                <!-- Optional Details (expandable) -->
+                <div class="optional-toggle" onclick="toggleOptional()">
+                    <span id="optionalIcon">▸</span> Optional: RPE, Tempo, Notes
+                </div>
+                <div id="optionalFields" class="optional-fields" style="display: none;">
+                    <div class="exercise-row">
+                        <select id="rpeSelect" class="ex-select">
+                            <option value="">RPE</option>
+                            <option value="6">6 - Easy</option>
+                            <option value="7">7 - Moderate</option>
+                            <option value="8">8 - Hard</option>
+                            <option value="9">9 - Very Hard</option>
+                            <option value="10">10 - Max</option>
+                        </select>
+                        <select id="tempoSelect" class="ex-select">
+                            <option value="">Tempo</option>
+                            <option value="normal">Normal</option>
+                            <option value="slow">Slow</option>
+                            <option value="paused">Paused</option>
+                            <option value="explosive">Explosive</option>
+                        </select>
+                    </div>
+                    <input type="text" id="notesInput" class="ex-notes" placeholder="Notes...">
+                </div>
+                
+                <!-- Logged Exercises List -->
+                <div id="exerciseList" class="exercise-list"></div>
+                
+                <!-- Workout Notes -->
+                <textarea id="workoutNotes" class="ex-notes" placeholder="Workout notes (optional)..." style="margin-top: 12px;"></textarea>
+                <button class="btn" style="margin-top: 12px;" onclick="saveWorkoutNotes()">Save Notes</button>
             </div>
             
             <!-- Past Logs -->
@@ -1370,8 +1579,26 @@ SETTINGS_HTML = """
     <script>
         const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
         
+        // Default plan from user's PDF
+        const defaultPlan = {
+            mon: 'Climbing - Power/Projecting',
+            tue: 'Climbing - Endurance + Gym',
+            wed: 'Rest',
+            thu: 'Climbing - Power/Projecting',
+            fri: 'Climbing - Endurance + Gym',
+            sat: 'Optional Climbing or Gym',
+            sun: 'Rest / Sauna'
+        };
+        
         function loadPlan() {
-            const plan = JSON.parse(localStorage.getItem('weeklyPlan') || '{}');
+            const stored = localStorage.getItem('weeklyPlan');
+            const plan = stored ? JSON.parse(stored) : defaultPlan;
+            
+            // If no stored plan, save the default
+            if (!stored) {
+                localStorage.setItem('weeklyPlan', JSON.stringify(defaultPlan));
+            }
+            
             days.forEach(day => {
                 document.getElementById(day).value = plan[day] || '';
             });
