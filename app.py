@@ -896,6 +896,7 @@ DASHBOARD_HTML = """
         // Exercise Database
         const exerciseDB = {
             categories: [
+                { id: "warmup", name: "Warmup", exercises: ["dynamic_stretching", "static_stretching", "foam_rolling", "arm_circles", "leg_swings", "hip_circles", "shoulder_rolls", "neck_rotations", "wrist_rotations", "ankle_rotations", "jumping_jacks", "high_knees", "butt_kicks", "world_greatest_stretch", "cat_cow", "child_pose", "downward_dog", "inchworm", "band_pull_apart_warmup", "light_jog"] },
                 { id: "lower_compound", name: "Lower Body - Compound", exercises: ["back_squat", "front_squat", "goblet_squat", "box_squat", "forward_lunge", "reverse_lunge", "walking_lunge", "bulgarian_split_squat", "conventional_deadlift", "sumo_deadlift", "romanian_deadlift", "trap_bar_deadlift", "step_up", "lateral_step_up"] },
                 { id: "lower_isolation", name: "Lower Body - Isolation", exercises: ["leg_extension", "lying_hamstring_curl", "seated_hamstring_curl", "hip_thrust", "glute_bridge", "single_leg_hip_thrust", "standing_calf_raise", "seated_calf_raise", "hip_adduction_machine", "hip_abduction_machine"] },
                 { id: "upper_push", name: "Upper Body - Push", exercises: ["bench_press", "incline_bench_press", "decline_bench_press", "dumbbell_bench_press", "push_up", "floor_press", "close_grip_bench_press", "dip", "overhead_press", "push_press", "arnold_press", "dumbbell_fly", "cable_fly", "pec_deck"] },
