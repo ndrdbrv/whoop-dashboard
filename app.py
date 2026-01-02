@@ -468,6 +468,30 @@ DASHBOARD_HTML = """
             gap: 12px;
         }
         
+        /* Planned Workout */
+        .planned-card {
+            background: rgba(96, 165, 250, 0.08);
+            border: 1px solid rgba(96, 165, 250, 0.15);
+            border-radius: 16px;
+            padding: 18px;
+        }
+        
+        .planned-workout {
+            font-size: 18px;
+            font-weight: 500;
+            color: #60a5fa;
+            margin-bottom: 8px;
+        }
+        
+        .planned-note {
+            font-size: 13px;
+            color: var(--white-60);
+            line-height: 1.5;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            margin-top: 12px;
+        }
+        
         /* Workout Log */
         .log-card {
             background: rgba(20,20,22,0.85);
@@ -687,6 +711,39 @@ DASHBOARD_HTML = """
         // Load saved log on page load
         document.addEventListener('DOMContentLoaded', showSavedLog);
         
+        // Show planned workout
+        function showPlannedWorkout() {
+            const plan = JSON.parse(localStorage.getItem('weeklyPlan') || '{}');
+            const dayMap = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+            const todayKey = dayMap[new Date().getDay()];
+            const planned = plan[todayKey];
+            
+            if (planned && planned.trim()) {
+                document.getElementById('plannedSection').style.display = 'block';
+                document.getElementById('plannedWorkout').textContent = planned;
+                
+                // Show AI note if enabled
+                const aiEnabled = localStorage.getItem('aiCoachEnabled') === 'true';
+                if (aiEnabled) {
+                    const recovery = parseInt('{{ recovery_score }}') || 50;
+                    let note = '';
+                    
+                    if (recovery >= 67) {
+                        note = '🟢 High recovery - push hard today, go for projects or increase intensity.';
+                    } else if (recovery >= 34) {
+                        note = '🟡 Moderate recovery - stick to your plan but listen to your body.';
+                    } else {
+                        note = '🔴 Low recovery - consider swapping for technique work or active recovery.';
+                    }
+                    
+                    document.getElementById('aiNote').textContent = note;
+                    document.getElementById('aiNote').style.display = 'block';
+                }
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', showPlannedWorkout);
+        
         function toggleHistory() {
             const historyDiv = document.getElementById('logHistory');
             const btnText = document.getElementById('historyBtnText');
@@ -769,6 +826,15 @@ DASHBOARD_HTML = """
             <span>{{ warning }}</span>
         </div>
         {% endfor %}
+        
+        <!-- Planned Workout -->
+        <div class="section" id="plannedSection" style="display: none;">
+            <div class="section-title">Planned Today</div>
+            <div class="planned-card">
+                <div class="planned-workout" id="plannedWorkout"></div>
+                <div class="planned-note" id="aiNote" style="display: none;"></div>
+            </div>
+        </div>
         
         <!-- Workout Log Section -->
         <div class="section">
@@ -864,7 +930,7 @@ Add notes, RPE, how it felt..."></textarea>
         </div>
         
         <div class="footer">
-            Updated {{ updated_at }} · <a href="/">Refresh</a>
+            Updated {{ updated_at }} · <a href="/">Refresh</a> · <a href="/settings">Settings</a>
         </div>
     </div>
     {% endif %}
@@ -1092,6 +1158,233 @@ def add_to_calendar():
 @app.route("/health")
 def health():
     return {"status": "ok"}
+
+
+@app.route("/settings")
+def settings():
+    return render_template_string(SETTINGS_HTML)
+
+
+SETTINGS_HTML = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: #000;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            padding: 24px;
+        }
+        .container { max-width: 500px; margin: 0 auto; }
+        h1 {
+            font-size: 24px;
+            font-weight: 300;
+            margin-bottom: 32px;
+            text-align: center;
+        }
+        .back {
+            display: inline-block;
+            color: rgba(255,255,255,0.4);
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+        .section {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .section-title {
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.4);
+            margin-bottom: 16px;
+        }
+        .day-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .day-row:last-child { border-bottom: none; }
+        .day-name {
+            width: 40px;
+            font-size: 13px;
+            font-weight: 500;
+            color: rgba(255,255,255,0.6);
+        }
+        .day-input {
+            flex: 1;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            padding: 12px;
+            color: #fff;
+            font-size: 14px;
+        }
+        .day-input:focus {
+            outline: none;
+            border-color: rgba(255,255,255,0.2);
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            background: #fff;
+            color: #000;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .saved-msg {
+            text-align: center;
+            color: #4ade80;
+            font-size: 14px;
+            margin-top: 16px;
+            display: none;
+        }
+        .ai-toggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+        }
+        .ai-label {
+            font-size: 14px;
+            color: rgba(255,255,255,0.8);
+        }
+        .ai-desc {
+            font-size: 12px;
+            color: rgba(255,255,255,0.4);
+            margin-top: 4px;
+        }
+        .toggle {
+            width: 50px;
+            height: 28px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 14px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .toggle.active { background: #4ade80; }
+        .toggle::after {
+            content: '';
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            background: #fff;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: transform 0.2s;
+        }
+        .toggle.active::after { transform: translateX(22px); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back">← Back</a>
+        <h1>Training Settings</h1>
+        
+        <div class="section">
+            <div class="section-title">Weekly Plan</div>
+            <div class="day-row">
+                <span class="day-name">Mon</span>
+                <input type="text" class="day-input" id="mon" placeholder="e.g., Climbing - Bouldering">
+            </div>
+            <div class="day-row">
+                <span class="day-name">Tue</span>
+                <input type="text" class="day-input" id="tue" placeholder="e.g., Gym - Upper Body">
+            </div>
+            <div class="day-row">
+                <span class="day-name">Wed</span>
+                <input type="text" class="day-input" id="wed" placeholder="e.g., Rest">
+            </div>
+            <div class="day-row">
+                <span class="day-name">Thu</span>
+                <input type="text" class="day-input" id="thu" placeholder="e.g., Running">
+            </div>
+            <div class="day-row">
+                <span class="day-name">Fri</span>
+                <input type="text" class="day-input" id="fri" placeholder="e.g., Climbing - Routes">
+            </div>
+            <div class="day-row">
+                <span class="day-name">Sat</span>
+                <input type="text" class="day-input" id="sat" placeholder="e.g., Gym - Full Body">
+            </div>
+            <div class="day-row">
+                <span class="day-name">Sun</span>
+                <input type="text" class="day-input" id="sun" placeholder="e.g., Rest / Sauna">
+            </div>
+            <button class="btn" onclick="savePlan()">Save Weekly Plan</button>
+            <div class="saved-msg" id="savedMsg">✓ Saved</div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">AI Coach</div>
+            <div class="ai-toggle">
+                <div>
+                    <div class="ai-label">Enable AI Suggestions</div>
+                    <div class="ai-desc">Claude analyzes your WHOOP data and adjusts training</div>
+                </div>
+                <div class="toggle" id="aiToggle" onclick="toggleAI()"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+        
+        function loadPlan() {
+            const plan = JSON.parse(localStorage.getItem('weeklyPlan') || '{}');
+            days.forEach(day => {
+                document.getElementById(day).value = plan[day] || '';
+            });
+            
+            const aiEnabled = localStorage.getItem('aiCoachEnabled') === 'true';
+            document.getElementById('aiToggle').classList.toggle('active', aiEnabled);
+        }
+        
+        function savePlan() {
+            const plan = {};
+            days.forEach(day => {
+                plan[day] = document.getElementById(day).value;
+            });
+            localStorage.setItem('weeklyPlan', JSON.stringify(plan));
+            
+            document.getElementById('savedMsg').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('savedMsg').style.display = 'none';
+            }, 2000);
+        }
+        
+        function toggleAI() {
+            const toggle = document.getElementById('aiToggle');
+            toggle.classList.toggle('active');
+            localStorage.setItem('aiCoachEnabled', toggle.classList.contains('active'));
+        }
+        
+        loadPlan();
+    </script>
+</body>
+</html>
+"""
 
 
 if __name__ == "__main__":
