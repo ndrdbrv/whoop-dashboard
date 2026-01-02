@@ -367,6 +367,85 @@ DASHBOARD_HTML = """
         .day-score.red { color: #f87171; }
         .day-score.empty { color: var(--white-10); }
         
+        .day { cursor: pointer; transition: transform 0.1s; }
+        .day:hover { transform: scale(1.05); }
+        .day:active { transform: scale(0.98); }
+        
+        /* Day Modal */
+        .day-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            backdrop-filter: blur(4px);
+        }
+        
+        .day-modal-content {
+            background: rgba(25,25,28,0.98);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 320px;
+            overflow: hidden;
+        }
+        
+        .day-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        
+        .day-modal-header span {
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .day-modal-close {
+            background: none;
+            border: none;
+            color: var(--white-40);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+        
+        .day-modal-body {
+            padding: 16px 20px;
+        }
+        
+        .day-modal-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        
+        .day-modal-row:last-child { border-bottom: none; }
+        
+        .day-modal-label {
+            font-size: 14px;
+            color: var(--white-40);
+        }
+        
+        .day-modal-value {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--white);
+        }
+        
+        .day-modal-value.green { color: #4ade80; }
+        .day-modal-value.yellow { color: #fbbf24; }
+        .day-modal-value.red { color: #f87171; }
+        
         /* Insight */
         .insight {
             margin-top: 16px;
@@ -895,6 +974,35 @@ DASHBOARD_HTML = """
             loadWorkoutNotes();
         });
         
+        // Day Details Modal
+        const dayNames = { M: 'Monday', T: 'Tuesday', W: 'Wednesday', T: 'Thursday', F: 'Friday', S: 'Saturday', S: 'Sunday' };
+        const fullDayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+        
+        function showDayDetails(name, recovery, strain, sleep, hrv, rhr, color) {
+            // Map short name to full name
+            const dayIndex = ['M', 'T', 'W', 'T', 'F', 'S', 'S'].indexOf(name);
+            const fullName = fullDayNames[dayIndex] || name;
+            
+            document.getElementById('modalDayName').textContent = fullName;
+            
+            const recoveryEl = document.getElementById('modalRecovery');
+            recoveryEl.textContent = recovery !== '—' ? recovery + '%' : '—';
+            recoveryEl.className = 'day-modal-value ' + color;
+            
+            document.getElementById('modalStrain').textContent = strain;
+            document.getElementById('modalSleep').textContent = sleep;
+            document.getElementById('modalHRV').textContent = hrv !== '—' ? hrv + ' ms' : '—';
+            document.getElementById('modalRHR').textContent = rhr !== '—' ? rhr + ' bpm' : '—';
+            
+            document.getElementById('dayModal').style.display = 'flex';
+        }
+        
+        function closeDayModal(e) {
+            if (!e || e.target.id === 'dayModal') {
+                document.getElementById('dayModal').style.display = 'none';
+            }
+        }
+        
         // Show planned workout
         function showPlannedWorkout() {
             const plan = JSON.parse(localStorage.getItem('weeklyPlan') || '{}');
@@ -1133,13 +1241,45 @@ DASHBOARD_HTML = """
             <div class="section-title">This Week</div>
             <div class="week">
                 {% for day in weekly_recovery %}
-                <div class="day {{ 'today' if day.is_today else '' }}">
+                <div class="day {{ 'today' if day.is_today else '' }}" onclick="showDayDetails('{{ day.name }}', '{{ day.score }}', '{{ day.strain }}', '{{ day.sleep }}', '{{ day.hrv }}', '{{ day.rhr }}', '{{ day.color }}')">
                     <div class="day-name">{{ day.name }}</div>
                     <div class="day-score {{ day.color if day.color else 'empty' }}">{{ day.score }}</div>
                 </div>
                 {% endfor %}
             </div>
             <div class="insight">{{ weekly_suggestion }}</div>
+            
+            <!-- Day Details Modal -->
+            <div id="dayModal" class="day-modal" style="display: none;" onclick="closeDayModal(event)">
+                <div class="day-modal-content" onclick="event.stopPropagation()">
+                    <div class="day-modal-header">
+                        <span id="modalDayName"></span>
+                        <button class="day-modal-close" onclick="closeDayModal()">&times;</button>
+                    </div>
+                    <div class="day-modal-body">
+                        <div class="day-modal-row">
+                            <span class="day-modal-label">Recovery</span>
+                            <span class="day-modal-value" id="modalRecovery"></span>
+                        </div>
+                        <div class="day-modal-row">
+                            <span class="day-modal-label">Strain</span>
+                            <span class="day-modal-value" id="modalStrain"></span>
+                        </div>
+                        <div class="day-modal-row">
+                            <span class="day-modal-label">Sleep</span>
+                            <span class="day-modal-value" id="modalSleep"></span>
+                        </div>
+                        <div class="day-modal-row">
+                            <span class="day-modal-label">HRV</span>
+                            <span class="day-modal-value" id="modalHRV"></span>
+                        </div>
+                        <div class="day-modal-row">
+                            <span class="day-modal-label">RHR</span>
+                            <span class="day-modal-value" id="modalRHR"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         
         <div class="section">
@@ -1256,31 +1396,63 @@ def index():
         day_names = ["M", "T", "W", "T", "F", "S", "S"]
         today_idx = datetime.now().weekday()
         
+        # Get cycles for strain data
+        cycles_data = client.get_cycles(limit=7)
+        sleep_data = client.get_sleep(limit=7)
+        
         weekly_recovery = []
         for i, day_name in enumerate(day_names):
             is_today = (i == today_idx)
             score_val = "—"
             color = ""
+            strain_val = "—"
+            sleep_val = "—"
+            hrv_val = "—"
+            rhr_val = "—"
             
             if is_today:
                 score_val = str(recovery_score) if recovery_score else "—"
                 color = score_color
+                strain_val = "—"  # Today's strain is ongoing
+                sleep_val = str(sleep_perf) + "%" if sleep_perf else "—"
+                hrv_val = str(hrv) if hrv else "—"
+                rhr_val = str(rhr) if rhr else "—"
             elif i < today_idx and recovery_history:
                 day_offset = today_idx - i
                 if day_offset < len(recovery_history):
                     r = recovery_history[day_offset]
                     if r.get("score_state") == "SCORED" and r.get("score"):
-                        s = int(r["score"].get("recovery_score", 0))
+                        sc = r["score"]
+                        s = int(sc.get("recovery_score", 0))
                         score_val = str(s)
+                        hrv_val = str(round(sc.get("hrv_rmssd_milli", 0), 1))
+                        rhr_val = str(int(sc.get("resting_heart_rate", 0)))
                         if s >= 67: color = "green"
                         elif s >= 34: color = "yellow"
                         else: color = "red"
+                
+                # Get strain from cycles
+                if day_offset < len(cycles_data):
+                    c = cycles_data[day_offset]
+                    if c.get("score_state") == "SCORED" and c.get("score"):
+                        strain_val = str(round(c["score"].get("strain", 0), 1))
+                
+                # Get sleep performance
+                if day_offset < len(sleep_data):
+                    sl = sleep_data[day_offset]
+                    if sl.get("score_state") == "SCORED" and sl.get("score"):
+                        sp = sl["score"].get("sleep_performance_percentage", 0)
+                        sleep_val = str(int(sp)) + "%" if sp else "—"
             
             weekly_recovery.append({
                 "name": day_name,
                 "score": score_val,
                 "color": color,
-                "is_today": is_today
+                "is_today": is_today,
+                "strain": strain_val,
+                "sleep": sleep_val,
+                "hrv": hrv_val,
+                "rhr": rhr_val
             })
         
         recent_activities = []
