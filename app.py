@@ -460,35 +460,78 @@ DASHBOARD_HTML = """
         
         /* Activity */
         .activity-list {
-            background: rgba(20,20,22,0.85);
-            border: 1px solid rgba(255,255,255,0.03);
-            border-radius: 18px;
-            overflow: hidden;
-        }
-        
-        .activity {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px 18px;
-            border-bottom: 1px solid rgba(255,255,255,0.03);
-        }
-        
-        .activity:last-child {
-            border-bottom: none;
-        }
-        
-        .activity-name {
-            font-size: 13px;
-            color: var(--white-60);
-            display: flex;
-            align-items: center;
+            flex-direction: column;
             gap: 10px;
         }
         
-        .activity-strain {
-            font-size: 13px;
-            color: var(--white-20);
+        .activity-card {
+            background: rgba(20,20,22,0.85);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 14px 16px;
+        }
+        
+        .activity-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .activity-icon {
+            font-size: 24px;
+        }
+        
+        .activity-info {
+            flex: 1;
+        }
+        
+        .activity-name {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--white);
+            margin-bottom: 2px;
+        }
+        
+        .activity-time {
+            font-size: 12px;
+            color: var(--white-40);
+        }
+        
+        .activity-strain-badge {
+            font-size: 16px;
+            font-weight: 600;
+            color: #60a5fa;
+            background: rgba(96, 165, 250, 0.1);
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+        
+        .activity-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+        
+        .activity-stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            display: block;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--white);
+        }
+        
+        .stat-label {
+            font-size: 10px;
+            color: var(--white-40);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
         
         /* Footer */
@@ -1161,7 +1204,7 @@ DASHBOARD_HTML = """
     {% else %}
     <div class="mountain-bg"></div>
     <div class="app">
-        <a href="/settings" class="setup-link">⚙ Set Up Training Plan</a>
+        <a href="/settings" class="setup-link">⚙ Edit Training Plan</a>
         <div class="header">
             <div class="header-label">{{ user_name }}</div>
             <div class="score {{ score_color }}">{{ recovery_score }}</div>
@@ -1358,15 +1401,36 @@ DASHBOARD_HTML = """
         </div>
         
         <div class="section">
-            <div class="section-title">Recent</div>
+            <div class="section-title">Recent Workouts</div>
             <div class="activity-list">
                 {% for activity in recent_activities %}
-                <div class="activity">
-                    <span class="activity-name">
-                        <span>{{ activity.icon }}</span>
-                        {{ activity.name }}
-                    </span>
-                    <span class="activity-strain">{{ activity.strain }}</span>
+                <div class="activity-card">
+                    <div class="activity-header">
+                        <span class="activity-icon">{{ activity.icon }}</span>
+                        <div class="activity-info">
+                            <div class="activity-name">{{ activity.name }}</div>
+                            <div class="activity-time">{{ activity.time }}</div>
+                        </div>
+                        <div class="activity-strain-badge">{{ activity.strain }}</div>
+                    </div>
+                    <div class="activity-stats">
+                        <div class="activity-stat">
+                            <span class="stat-value">{{ activity.duration }}</span>
+                            <span class="stat-label">min</span>
+                        </div>
+                        <div class="activity-stat">
+                            <span class="stat-value">{{ activity.max_hr }}</span>
+                            <span class="stat-label">max HR</span>
+                        </div>
+                        <div class="activity-stat">
+                            <span class="stat-value">{{ activity.avg_hr }}</span>
+                            <span class="stat-label">avg HR</span>
+                        </div>
+                        <div class="activity-stat">
+                            <span class="stat-value">{{ activity.calories }}</span>
+                            <span class="stat-label">kcal</span>
+                        </div>
+                    </div>
                 </div>
                 {% endfor %}
             </div>
@@ -1531,18 +1595,44 @@ def index():
             })
         
         recent_activities = []
-        for w in workouts_data[:4]:
+        for w in workouts_data[:5]:
             if w.get("score_state") == "SCORED" and w.get("score"):
                 sport = w.get("sport_name", "activity")
-                strain = round(w["score"].get("strain", 0), 1)
+                score = w["score"]
+                strain = round(score.get("strain", 0), 1)
+                max_hr = score.get("max_heart_rate", 0)
+                avg_hr = score.get("average_heart_rate", 0)
+                calories = round(score.get("kilojoule", 0) / 4.184)  # Convert kJ to kcal
+                
+                # Calculate duration
+                start = datetime.fromisoformat(w["start"].replace("Z", "+00:00"))
+                end = datetime.fromisoformat(w["end"].replace("Z", "+00:00"))
+                duration_mins = int((end - start).total_seconds() / 60)
+                
+                # Format time
+                workout_time = start.strftime("%b %d, %H:%M")
+                
                 icon = "💪"
                 sport_lower = sport.lower()
                 if "climb" in sport_lower or "boulder" in sport_lower: icon = "🧗"
                 elif "run" in sport_lower: icon = "🏃"
-                elif "gym" in sport_lower or "fitness" in sport_lower: icon = "🏋️"
-                elif "sauna" in sport_lower: icon = "🧖"
+                elif "gym" in sport_lower or "fitness" in sport_lower or "weight" in sport_lower: icon = "🏋️"
+                elif "sauna" in sport_lower or "heat" in sport_lower: icon = "🧖"
+                elif "cycling" in sport_lower or "bike" in sport_lower: icon = "🚴"
+                elif "swim" in sport_lower: icon = "🏊"
+                elif "yoga" in sport_lower: icon = "🧘"
+                elif "walk" in sport_lower or "hike" in sport_lower: icon = "🚶"
                 
-                recent_activities.append({"icon": icon, "name": sport[:18], "strain": strain})
+                recent_activities.append({
+                    "icon": icon, 
+                    "name": sport.replace("_", " ").title()[:20], 
+                    "strain": strain,
+                    "duration": duration_mins,
+                    "max_hr": max_hr,
+                    "avg_hr": avg_hr,
+                    "calories": calories,
+                    "time": workout_time
+                })
         
         weekly = planner.get_weekly_plan()
         
