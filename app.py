@@ -1001,16 +1001,16 @@ DASHBOARD_HTML = """
         // Exercise Database
         const exerciseDB = {
             categories: [
-                { id: "warmup", name: "Warmup", exercises: ["dynamic_stretching", "static_stretching", "foam_rolling", "arm_circles", "leg_swings", "hip_circles", "shoulder_rolls", "neck_rotations", "wrist_rotations", "ankle_rotations", "jumping_jacks", "high_knees", "butt_kicks", "world_greatest_stretch", "cat_cow", "child_pose", "downward_dog", "inchworm", "band_pull_apart_warmup", "light_jog"] },
-                { id: "lower_compound", name: "Lower Body - Compound", exercises: ["back_squat", "front_squat", "goblet_squat", "box_squat", "forward_lunge", "reverse_lunge", "walking_lunge", "bulgarian_split_squat", "conventional_deadlift", "sumo_deadlift", "romanian_deadlift", "trap_bar_deadlift", "step_up", "lateral_step_up"] },
-                { id: "lower_isolation", name: "Lower Body - Isolation", exercises: ["leg_extension", "lying_hamstring_curl", "seated_hamstring_curl", "hip_thrust", "glute_bridge", "single_leg_hip_thrust", "standing_calf_raise", "seated_calf_raise", "hip_adduction_machine", "hip_abduction_machine"] },
-                { id: "upper_push", name: "Upper Body - Push", exercises: ["bench_press", "incline_bench_press", "decline_bench_press", "dumbbell_bench_press", "push_up", "floor_press", "close_grip_bench_press", "dip", "overhead_press", "push_press", "arnold_press", "dumbbell_fly", "cable_fly", "pec_deck"] },
-                { id: "upper_pull", name: "Upper Body - Pull", exercises: ["pull_up", "chin_up", "lat_pulldown", "assisted_pull_up", "barbell_row", "dumbbell_row", "cable_row", "chest_supported_row", "inverted_row", "face_pull", "band_pull_apart", "straight_arm_pulldown"] },
-                { id: "shoulders_arms", name: "Shoulders & Arms", exercises: ["lateral_raise", "front_raise", "rear_delt_fly", "shoulder_shrug", "upright_row", "barbell_curl", "dumbbell_curl", "hammer_curl", "preacher_curl", "cable_curl", "skull_crusher", "triceps_pushdown", "overhead_triceps_extension", "wrist_curl", "reverse_wrist_curl", "farmers_carry"] },
-                { id: "core", name: "Core", exercises: ["plank", "ab_wheel_rollout", "dead_bug", "pallof_press", "cable_anti_rotation_hold", "crunch", "hanging_leg_raise", "sit_up", "v_up", "russian_twist", "cable_chop"] },
-                { id: "climbing_specific", name: "Climbing-Specific", exercises: ["dead_hang", "max_hang", "repeater_hang", "half_crimp_hang", "open_hand_hang", "full_crimp_hang", "one_arm_hang", "assisted_one_arm_hang", "campus_ladder", "campus_doubles", "limit_bouldering", "system_board_circuits"] },
-                { id: "conditioning", name: "Conditioning", exercises: ["rower", "assault_bike", "cross_trainer", "treadmill", "easy_run", "tempo_run", "interval_run", "hill_sprint", "burpee", "mountain_climber", "jump_squat", "jump_rope"] },
-                { id: "recovery", name: "Recovery", exercises: ["sauna", "cold_plunge", "contrast_therapy", "zone2_cardio", "walking", "yoga", "breathwork", "mobility_flow"] }
+                { id: "warmup", name: "Warmup", exercises: ["Dynamic Stretching", "Static Stretching", "Foam Rolling", "Arm Circles", "Leg Swings", "Hip Circles", "Shoulder Rolls", "Neck Rotations", "Wrist Rotations", "Ankle Rotations", "Jumping Jacks", "High Knees", "Butt Kicks", "World Greatest Stretch", "Cat Cow", "Child Pose", "Downward Dog", "Inchworm", "Band Pull Apart Warmup", "Light Jog"] },
+                { id: "lower_compound", name: "Lower Body - Compound", exercises: ["Back Squat", "Front Squat", "Goblet Squat", "Box Squat", "Forward Lunge", "Reverse Lunge", "Walking Lunge", "Bulgarian Split Squat", "Conventional Deadlift", "Sumo Deadlift", "Romanian Deadlift", "Trap Bar Deadlift", "Step Up", "Lateral Step Up"] },
+                { id: "lower_isolation", name: "Lower Body - Isolation", exercises: ["Leg Extension", "Lying Hamstring Curl", "Seated Hamstring Curl", "Hip Thrust", "Glute Bridge", "Single Leg Hip Thrust", "Standing Calf Raise", "Seated Calf Raise", "Hip Adduction Machine", "Hip Abduction Machine"] },
+                { id: "upper_push", name: "Upper Body - Push", exercises: ["Bench Press", "Incline Bench Press", "Decline Bench Press", "Dumbbell Bench Press", "Push Up", "Floor Press", "Close Grip Bench Press", "Dip", "Overhead Press", "Push Press", "Arnold Press", "Dumbbell Fly", "Cable Fly", "Pec Deck"] },
+                { id: "upper_pull", name: "Upper Body - Pull", exercises: ["Pull Up", "Chin Up", "Lat Pulldown", "Assisted Pull Up", "Barbell Row", "Dumbbell Row", "Cable Row", "Chest Supported Row", "Inverted Row", "Face Pull", "Band Pull Apart", "Straight Arm Pulldown"] },
+                { id: "shoulders_arms", name: "Shoulders & Arms", exercises: ["Lateral Raise", "Front Raise", "Rear Delt Fly", "Shoulder Shrug", "Upright Row", "Barbell Curl", "Dumbbell Curl", "Hammer Curl", "Preacher Curl", "Cable Curl", "Skull Crusher", "Triceps Pushdown", "Overhead Triceps Extension", "Wrist Curl", "Reverse Wrist Curl", "Farmers Carry"] },
+                { id: "core", name: "Core", exercises: ["Plank", "Ab Wheel Rollout", "Dead Bug", "Pallof Press", "Cable Anti Rotation Hold", "Crunch", "Hanging Leg Raise", "Sit Up", "V Up", "Russian Twist", "Cable Chop"] },
+                { id: "climbing_specific", name: "Climbing-Specific", exercises: ["Dead Hang", "Max Hang", "Repeater Hang", "Half Crimp Hang", "Open Hand Hang", "Full Crimp Hang", "One Arm Hang", "Assisted One Arm Hang", "Campus Ladder", "Campus Doubles", "Limit Bouldering", "System Board Circuits"] },
+                { id: "conditioning", name: "Conditioning", exercises: ["Rower", "Assault Bike", "Cross Trainer", "Treadmill", "Easy Run", "Tempo Run", "Interval Run", "Hill Sprint", "Burpee", "Mountain Climber", "Jump Squat", "Jump Rope"] },
+                { id: "recovery", name: "Recovery", exercises: ["Sauna", "Cold Plunge", "Contrast Therapy", "Zone 2 Cardio", "Walking", "Yoga", "Breathwork", "Mobility Flow"] }
             ]
         };
         
@@ -1037,7 +1037,7 @@ DASHBOARD_HTML = """
                 exerciseDB.categories.forEach(cat => {
                     cat.exercises.forEach(ex => {
                         const opt = document.createElement('option');
-                        opt.value = formatExerciseName(ex);
+                        opt.value = ex;
                         dataList.appendChild(opt);
                     });
                 });
@@ -1056,7 +1056,7 @@ DASHBOARD_HTML = """
                 exerciseDB.categories.forEach(cat => {
                     cat.exercises.forEach(ex => {
                         const opt = document.createElement('option');
-                        opt.value = formatExerciseName(ex);
+                        opt.value = ex;
                         dataList.appendChild(opt);
                     });
                 });
@@ -1065,7 +1065,7 @@ DASHBOARD_HTML = """
                 if (cat) {
                     cat.exercises.forEach(ex => {
                         const opt = document.createElement('option');
-                        opt.value = formatExerciseName(ex);
+                        opt.value = ex;
                         dataList.appendChild(opt);
                     });
                 }
