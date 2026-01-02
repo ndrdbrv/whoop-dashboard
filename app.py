@@ -534,6 +534,111 @@ DASHBOARD_HTML = """
             letter-spacing: 0.05em;
         }
         
+        /* Sleep Card */
+        .sleep-card {
+            background: rgba(20,20,22,0.85);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 16px;
+        }
+        
+        .sleep-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .sleep-icon {
+            font-size: 28px;
+        }
+        
+        .sleep-info {
+            flex: 1;
+        }
+        
+        .sleep-date {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--white);
+        }
+        
+        .sleep-total {
+            font-size: 13px;
+            color: var(--white-40);
+        }
+        
+        .sleep-perf-badge {
+            font-size: 16px;
+            font-weight: 600;
+            color: #a78bfa;
+            background: rgba(167, 139, 250, 0.1);
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+        
+        .sleep-stages {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        
+        .sleep-stage {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .stage-bar {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        
+        .stage-bar.light { background: #94a3b8; }
+        .stage-bar.rem { background: #60a5fa; }
+        .stage-bar.deep { background: #8b5cf6; }
+        .stage-bar.awake { background: #fbbf24; }
+        
+        .stage-label {
+            font-size: 13px;
+            color: var(--white-60);
+            width: 50px;
+        }
+        
+        .stage-value {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--white);
+        }
+        
+        .sleep-details {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+        
+        .sleep-detail {
+            text-align: center;
+        }
+        
+        .detail-value {
+            display: block;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--white);
+        }
+        
+        .detail-label {
+            font-size: 10px;
+            color: var(--white-40);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+        
         /* Footer */
         .footer {
             text-align: center;
@@ -1437,6 +1542,62 @@ DASHBOARD_HTML = """
             </div>
         </div>
         
+        {% if sleep_stages %}
+        <div class="section">
+            <div class="section-title">Last Night's Sleep</div>
+            <div class="sleep-card">
+                <div class="sleep-header">
+                    <span class="sleep-icon">🌙</span>
+                    <div class="sleep-info">
+                        <div class="sleep-date">{{ sleep_stages.date }}</div>
+                        <div class="sleep-total">{{ sleep_stages.total_in_bed }} in bed</div>
+                    </div>
+                    <div class="sleep-perf-badge">{{ sleep_stages.performance }}%</div>
+                </div>
+                <div class="sleep-stages">
+                    <div class="sleep-stage">
+                        <div class="stage-bar light" style="flex: {{ sleep_stages.light.split('h')[0] }}"></div>
+                        <span class="stage-label">Light</span>
+                        <span class="stage-value">{{ sleep_stages.light }}</span>
+                    </div>
+                    <div class="sleep-stage">
+                        <div class="stage-bar rem"></div>
+                        <span class="stage-label">REM</span>
+                        <span class="stage-value">{{ sleep_stages.rem }}</span>
+                    </div>
+                    <div class="sleep-stage">
+                        <div class="stage-bar deep"></div>
+                        <span class="stage-label">Deep</span>
+                        <span class="stage-value">{{ sleep_stages.deep }}</span>
+                    </div>
+                    <div class="sleep-stage">
+                        <div class="stage-bar awake"></div>
+                        <span class="stage-label">Awake</span>
+                        <span class="stage-value">{{ sleep_stages.awake }}</span>
+                    </div>
+                </div>
+                <div class="sleep-details">
+                    <div class="sleep-detail">
+                        <span class="detail-value">{{ sleep_stages.efficiency }}%</span>
+                        <span class="detail-label">Efficiency</span>
+                    </div>
+                    <div class="sleep-detail">
+                        <span class="detail-value">{{ sleep_stages.cycles }}</span>
+                        <span class="detail-label">Cycles</span>
+                    </div>
+                    <div class="sleep-detail">
+                        <span class="detail-value">{{ sleep_stages.disturbances }}</span>
+                        <span class="detail-label">Disturbances</span>
+                    </div>
+                    <div class="sleep-detail">
+                        <span class="detail-value">{{ sleep_stages.respiratory_rate }}</span>
+                        <span class="detail-label">Resp Rate</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
         <div class="footer">
             Updated {{ updated_at }} · <a href="/">Refresh</a> · <a href="/settings">Settings</a>
         </div>
@@ -1599,6 +1760,10 @@ def index():
         for w in workouts_data[:5]:
             if w.get("score_state") == "SCORED" and w.get("score"):
                 sport = w.get("sport_name", "activity")
+                # Clean up the sport name
+                if sport.lower() == "activity" or not sport:
+                    sport = "General Activity"
+                
                 score = w["score"]
                 strain = round(score.get("strain", 0), 1)
                 max_hr = score.get("max_heart_rate", 0)
@@ -1635,6 +1800,44 @@ def index():
                     "time": workout_time
                 })
         
+        # Get sleep stages from latest sleep
+        sleep_stages = None
+        if sleep_data and len(sleep_data) > 0:
+            latest_sleep = sleep_data[0]
+            if latest_sleep.get("score_state") == "SCORED" and latest_sleep.get("score"):
+                sc = latest_sleep["score"]
+                stages = sc.get("stage_summary", {})
+                sleep_needed = sc.get("sleep_needed", {})
+                
+                # Convert milliseconds to hours/minutes
+                def ms_to_hr_min(ms):
+                    if not ms: return {"hr": 0, "min": 0}
+                    total_mins = ms / 60000
+                    return {"hr": int(total_mins // 60), "min": int(total_mins % 60)}
+                
+                total_in_bed = ms_to_hr_min(stages.get("total_in_bed_time_milli", 0))
+                total_awake = ms_to_hr_min(stages.get("total_awake_time_milli", 0))
+                light_sleep = ms_to_hr_min(stages.get("total_light_sleep_time_milli", 0))
+                rem_sleep = ms_to_hr_min(stages.get("total_rem_sleep_time_milli", 0))
+                deep_sleep = ms_to_hr_min(stages.get("total_slow_wave_sleep_time_milli", 0))
+                
+                sleep_start = datetime.fromisoformat(latest_sleep["start"].replace("Z", "+00:00"))
+                sleep_end = datetime.fromisoformat(latest_sleep["end"].replace("Z", "+00:00"))
+                
+                sleep_stages = {
+                    "date": sleep_start.strftime("%b %d"),
+                    "performance": int(sc.get("sleep_performance_percentage", 0)),
+                    "efficiency": int(sc.get("sleep_efficiency_percentage", 0)),
+                    "total_in_bed": f"{total_in_bed['hr']}h {total_in_bed['min']}m",
+                    "awake": f"{total_awake['hr']}h {total_awake['min']}m" if total_awake['hr'] > 0 else f"{total_awake['min']}m",
+                    "light": f"{light_sleep['hr']}h {light_sleep['min']}m",
+                    "rem": f"{rem_sleep['hr']}h {rem_sleep['min']}m",
+                    "deep": f"{deep_sleep['hr']}h {deep_sleep['min']}m",
+                    "disturbances": stages.get("disturbance_count", 0),
+                    "cycles": stages.get("sleep_cycle_count", 0),
+                    "respiratory_rate": round(sc.get("respiratory_rate", 0), 1)
+                }
+        
         weekly = planner.get_weekly_plan()
         
         return render_template_string(
@@ -1652,6 +1855,7 @@ def index():
             weekly_recovery=weekly_recovery,
             weekly_suggestion=weekly.get("suggestion", ""),
             recent_activities=recent_activities,
+            sleep_stages=sleep_stages,
             updated_at=datetime.now().strftime("%H:%M")
         )
         
