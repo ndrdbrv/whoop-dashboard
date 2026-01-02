@@ -1304,7 +1304,7 @@ DASHBOARD_HTML = """
     <div class="login">
         <div class="login-icon">⛰</div>
         <h1 class="login-title">Training Dashboard</h1>
-        <p class="login-subtitle">Connect your WHOOP for personalized training built around your recovery.</p>
+        <p class="login-subtitle">Connect your WHOOP, load in your workouts, and let's ascend in 2026 together.</p>
         <a href="{{ auth_url }}" class="login-btn">Connect WHOOP</a>
     </div>
     {% else %}
