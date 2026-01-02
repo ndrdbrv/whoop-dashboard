@@ -743,20 +743,54 @@ def callback():
 
 @app.route("/calendar/add")
 def add_to_calendar():
-    global _current_workouts
-    idx = request.args.get("idx", 0, type=int)
-    if idx >= len(_current_workouts):
-        return "Not found", 404
+    # Regenerate workouts fresh to avoid memory issues
+    client = get_client()
+    if not client:
+        return redirect("/")
     
-    workout = _current_workouts[idx]
-    ics = generate_ics_content(
-        title=workout.title,
-        description=workout.description,
-        details=workout.details,
-        duration_min=workout.duration_min
-    )
-    return Response(ics, mimetype='text/calendar', 
-                   headers={'Content-Disposition': 'attachment; filename=workout.ics'})
+    try:
+        idx = request.args.get("idx", 0, type=int)
+        
+        recovery_data = client.get_latest_recovery()
+        recovery_score = 0
+        if recovery_data and recovery_data.get("score_state") == "SCORED" and recovery_data.get("score"):
+            recovery_score = int(recovery_data["score"].get("recovery_score", 0))
+        
+        workouts_data = client.get_recent_workouts(days=7)
+        climb_count = 0
+        days_since_climb = 7
+        
+        for w in workouts_data:
+            sport = w.get("sport_name", "").lower()
+            if any(k in sport for k in ["climbing", "bouldering"]):
+                climb_count += 1
+                from datetime import datetime, timedelta
+                w_date = datetime.fromisoformat(w["start"].replace("Z", "+00:00"))
+                days = (datetime.now(w_date.tzinfo) - w_date).days
+                days_since_climb = min(days_since_climb, days)
+        
+        generator = WorkoutGenerator()
+        workouts = generator.generate_day_plan(
+            recovery_score=recovery_score,
+            days_since_climb=days_since_climb,
+            climb_count_7d=climb_count,
+            recent_strain_avg=10
+        )
+        
+        if idx >= len(workouts):
+            return "Not found", 404
+        
+        workout = workouts[idx]
+        ics = generate_ics_content(
+            title=workout.title,
+            description=workout.description,
+            details=workout.details,
+            duration_min=workout.duration_min
+        )
+        return Response(ics, mimetype='text/calendar', 
+                       headers={'Content-Disposition': 'attachment; filename=workout.ics'})
+    except Exception as e:
+        return f"Error: {e}", 500
 
 
 @app.route("/health")
