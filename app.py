@@ -111,6 +111,24 @@ DASHBOARD_HTML = """
             padding: 0 24px 120px;
         }
         
+        .setup-link {
+            display: block;
+            text-align: center;
+            padding: 14px;
+            margin: 16px 0;
+            background: rgba(96, 165, 250, 0.1);
+            border: 1px solid rgba(96, 165, 250, 0.2);
+            border-radius: 12px;
+            color: #60a5fa;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .setup-link:hover {
+            background: rgba(96, 165, 250, 0.15);
+        }
+        
         /* Header */
         .header {
             padding: 80px 0 60px;
@@ -798,6 +816,7 @@ DASHBOARD_HTML = """
     {% else %}
     <div class="mountain-bg"></div>
     <div class="app">
+        <a href="/settings" class="setup-link">⚙ Set Up Training Plan</a>
         <div class="header">
             <div class="header-label">{{ user_name }}</div>
             <div class="score {{ score_color }}">{{ recovery_score }}</div>
