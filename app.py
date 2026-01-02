@@ -658,7 +658,7 @@ DASHBOARD_HTML = """
         }
         
         function clearLog() {
-            if (confirm('Clear today\\'s log?')) {
+            if (confirm('Clear this log?')) {
                 const logs = JSON.parse(localStorage.getItem('workoutLogs') || '{}');
                 delete logs[today];
                 localStorage.setItem('workoutLogs', JSON.stringify(logs));
@@ -678,7 +678,7 @@ DASHBOARD_HTML = """
                         <span class="log-saved-title">✓ Logged</span>
                         <span class="log-saved-time">${todayLog.time}</span>
                     </div>
-                    ${todayLog.text.replace(/\\n/g, '<br>')}
+                    ${todayLog.text.replace(/\n/g, '<br>')}
                 `;
                 savedDiv.style.display = 'block';
             }
