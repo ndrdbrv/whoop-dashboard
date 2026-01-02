@@ -468,6 +468,92 @@ DASHBOARD_HTML = """
             gap: 12px;
         }
         
+        /* Workout Log */
+        .log-card {
+            background: rgba(20,20,22,0.85);
+            border: 1px solid rgba(255,255,255,0.04);
+            border-radius: 20px;
+            padding: 20px;
+            backdrop-filter: blur(20px);
+        }
+        
+        .log-input {
+            width: 100%;
+            min-height: 120px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 14px;
+            color: var(--white);
+            font-family: inherit;
+            font-size: 13px;
+            line-height: 1.6;
+            resize: vertical;
+            margin-bottom: 12px;
+        }
+        
+        .log-input::placeholder {
+            color: var(--white-20);
+        }
+        
+        .log-input:focus {
+            outline: none;
+            border-color: rgba(255,255,255,0.15);
+        }
+        
+        .log-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .log-actions .btn {
+            flex: 1;
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--white-40);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.05);
+        }
+        
+        .log-saved {
+            background: rgba(74, 222, 128, 0.1);
+            border: 1px solid rgba(74, 222, 128, 0.2);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            color: var(--white-60);
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+        
+        .log-saved-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        
+        .log-saved-title {
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #4ade80;
+        }
+        
+        .log-saved-time {
+            font-size: 11px;
+            color: var(--white-20);
+        }
+        
         .calendar-row {
             display: flex;
             gap: 10px;
@@ -523,6 +609,54 @@ DASHBOARD_HTML = """
             
             window.open(url, '_blank');
         }
+        
+        // Workout Log Functions
+        const today = new Date().toISOString().split('T')[0];
+        
+        function saveLog() {
+            const log = document.getElementById('workoutLog').value.trim();
+            if (!log) return;
+            
+            const logs = JSON.parse(localStorage.getItem('workoutLogs') || '{}');
+            logs[today] = {
+                text: log,
+                time: new Date().toLocaleTimeString('en-US', {hour: '2-digit', minute: '2-digit'})
+            };
+            localStorage.setItem('workoutLogs', JSON.stringify(logs));
+            
+            showSavedLog();
+            document.getElementById('workoutLog').value = '';
+        }
+        
+        function clearLog() {
+            if (confirm('Clear today\\'s log?')) {
+                const logs = JSON.parse(localStorage.getItem('workoutLogs') || '{}');
+                delete logs[today];
+                localStorage.setItem('workoutLogs', JSON.stringify(logs));
+                document.getElementById('savedLog').style.display = 'none';
+                document.getElementById('workoutLog').value = '';
+            }
+        }
+        
+        function showSavedLog() {
+            const logs = JSON.parse(localStorage.getItem('workoutLogs') || '{}');
+            const todayLog = logs[today];
+            const savedDiv = document.getElementById('savedLog');
+            
+            if (todayLog) {
+                savedDiv.innerHTML = `
+                    <div class="log-saved-header">
+                        <span class="log-saved-title">✓ Logged</span>
+                        <span class="log-saved-time">${todayLog.time}</span>
+                    </div>
+                    ${todayLog.text.replace(/\\n/g, '<br>')}
+                `;
+                savedDiv.style.display = 'block';
+            }
+        }
+        
+        // Load saved log on page load
+        document.addEventListener('DOMContentLoaded', showSavedLog);
     </script>
 </head>
 <body>
@@ -566,8 +700,25 @@ DASHBOARD_HTML = """
         </div>
         {% endfor %}
         
+        <!-- Workout Log Section -->
         <div class="section">
-            <div class="section-title">Today</div>
+            <div class="section-title">Log Today's Workout</div>
+            <div class="log-card">
+                <div class="log-saved" id="savedLog" style="display: none;"></div>
+                <textarea id="workoutLog" class="log-input" placeholder="Bench Press: 80kg × 8, 85kg × 6, 85kg × 6
+Incline DB: 30kg × 10 × 3
+Cable Flies: 15kg × 12 × 3
+
+Add notes, RPE, how it felt..."></textarea>
+                <div class="log-actions">
+                    <button class="btn btn-secondary" onclick="clearLog()">Clear</button>
+                    <button class="btn" onclick="saveLog()">Save Workout</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">Suggested</div>
             {% for workout in workouts %}
             <div class="workout">
                 <div class="workout-header">
