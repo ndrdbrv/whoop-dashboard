@@ -604,44 +604,79 @@ DASHBOARD_HTML = """
             margin-bottom: 10px;
         }
         
+        .exercise-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+        }
+        
         .ex-select {
-            flex: 1;
-            padding: 12px;
+            width: 100%;
+            padding: 14px;
             background: rgba(255,255,255,0.04);
             border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 10px;
+            border-radius: 12px;
             color: var(--white);
-            font-size: 13px;
+            font-size: 14px;
             cursor: pointer;
             appearance: none;
         }
-        
-        .ex-select-wide { flex: 2; }
         
         .ex-select option {
             background: #1a1a1a;
             color: white;
         }
         
-        .ex-input {
-            flex: 1;
-            padding: 12px;
+        .ex-input-wide {
+            width: 100%;
+            padding: 14px;
             background: rgba(255,255,255,0.04);
             border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 10px;
+            border-radius: 12px;
             color: var(--white);
-            font-size: 13px;
+            font-size: 14px;
+        }
+        
+        .ex-field {
+            position: relative;
+        }
+        
+        .ex-input {
+            width: 100%;
+            padding: 14px 12px 14px 12px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            color: var(--white);
+            font-size: 16px;
             text-align: center;
         }
         
-        .ex-input::placeholder { color: var(--white-20); }
-        .ex-input:focus, .ex-select:focus { outline: none; border-color: rgba(255,255,255,0.2); }
+        .ex-unit {
+            position: absolute;
+            bottom: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: var(--white-20);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
         
-        .ex-add-btn {
-            flex: 0 0 48px;
-            padding: 12px;
-            font-size: 18px;
-            font-weight: 300;
+        .ex-input::placeholder { color: var(--white-20); }
+        .ex-input:focus, .ex-select:focus, .ex-input-wide:focus { outline: none; border-color: rgba(255,255,255,0.2); }
+        
+        .add-exercise-btn {
+            width: 100%;
+            margin-top: 20px;
+            padding: 14px;
+            background: rgba(96, 165, 250, 0.15);
+            border: 1px solid rgba(96, 165, 250, 0.3);
+            color: #60a5fa;
+        }
+        
+        .add-exercise-btn:hover {
+            background: rgba(96, 165, 250, 0.25);
         }
         
         .optional-toggle {
@@ -676,28 +711,36 @@ DASHBOARD_HTML = """
             padding-top: 12px;
         }
         
+        .exercise-list {
+            margin-top: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
         .exercise-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.04);
+            padding: 14px 16px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
         }
-        
-        .exercise-item:last-child { border-bottom: none; }
         
         .exercise-info {
             flex: 1;
         }
         
         .exercise-name {
-            font-size: 14px;
+            font-size: 15px;
+            font-weight: 500;
             color: var(--white);
-            margin-bottom: 2px;
+            margin-bottom: 4px;
         }
         
         .exercise-details {
-            font-size: 12px;
+            font-size: 13px;
             color: var(--white-40);
         }
         
@@ -838,23 +881,45 @@ DASHBOARD_HTML = """
                 opt.textContent = cat.name;
                 catSelect.appendChild(opt);
             });
+            
+            // Populate datalist with all exercises
+            const dataList = document.getElementById('exerciseOptions');
+            if (dataList) {
+                exerciseDB.categories.forEach(cat => {
+                    cat.exercises.forEach(ex => {
+                        const opt = document.createElement('option');
+                        opt.value = formatExerciseName(ex);
+                        dataList.appendChild(opt);
+                    });
+                });
+            }
         }
         
         function updateExercises() {
             const catId = document.getElementById('categorySelect').value;
-            const exSelect = document.getElementById('exerciseSelect');
-            exSelect.innerHTML = '<option value="">Exercise</option>';
+            const dataList = document.getElementById('exerciseOptions');
+            const input = document.getElementById('exerciseInput');
+            dataList.innerHTML = '';
+            input.value = '';
             
-            if (!catId) return;
-            
-            const cat = exerciseDB.categories.find(c => c.id === catId);
-            if (cat) {
-                cat.exercises.forEach(ex => {
-                    const opt = document.createElement('option');
-                    opt.value = ex;
-                    opt.textContent = formatExerciseName(ex);
-                    exSelect.appendChild(opt);
+            if (!catId) {
+                // Show all exercises
+                exerciseDB.categories.forEach(cat => {
+                    cat.exercises.forEach(ex => {
+                        const opt = document.createElement('option');
+                        opt.value = formatExerciseName(ex);
+                        dataList.appendChild(opt);
+                    });
                 });
+            } else {
+                const cat = exerciseDB.categories.find(c => c.id === catId);
+                if (cat) {
+                    cat.exercises.forEach(ex => {
+                        const opt = document.createElement('option');
+                        opt.value = formatExerciseName(ex);
+                        dataList.appendChild(opt);
+                    });
+                }
             }
         }
         
@@ -871,7 +936,7 @@ DASHBOARD_HTML = """
         }
         
         function addExercise() {
-            const exercise = document.getElementById('exerciseSelect').value;
+            const exercise = document.getElementById('exerciseInput').value.trim();
             const weight = document.getElementById('weightInput').value;
             const sets = document.getElementById('setsInput').value;
             const reps = document.getElementById('repsInput').value;
@@ -879,7 +944,7 @@ DASHBOARD_HTML = """
             const tempo = document.getElementById('tempoSelect').value;
             const notes = document.getElementById('notesInput').value;
             
-            if (!exercise) { alert('Select an exercise'); return; }
+            if (!exercise) { alert('Enter an exercise'); return; }
             
             const logs = JSON.parse(localStorage.getItem('exerciseLogs') || '{}');
             if (!logs[today]) logs[today] = { exercises: [], notes: '' };
@@ -898,7 +963,7 @@ DASHBOARD_HTML = """
             localStorage.setItem('exerciseLogs', JSON.stringify(logs));
             
             // Clear inputs
-            document.getElementById('exerciseSelect').value = '';
+            document.getElementById('exerciseInput').value = '';
             document.getElementById('weightInput').value = '';
             document.getElementById('setsInput').value = '';
             document.getElementById('repsInput').value = '';
@@ -1139,21 +1204,31 @@ DASHBOARD_HTML = """
         <div class="section">
             <div class="section-title">Log Exercises</div>
             <div class="log-card">
-                <!-- Quick Add Row -->
+                <!-- Exercise Input -->
                 <div class="exercise-row">
                     <select id="categorySelect" class="ex-select" onchange="updateExercises()">
                         <option value="">Category</option>
                     </select>
-                    <select id="exerciseSelect" class="ex-select ex-select-wide">
-                        <option value="">Exercise</option>
-                    </select>
                 </div>
                 <div class="exercise-row">
-                    <input type="number" id="weightInput" class="ex-input" placeholder="kg">
-                    <input type="number" id="setsInput" class="ex-input" placeholder="sets">
-                    <input type="number" id="repsInput" class="ex-input" placeholder="reps">
-                    <button class="btn ex-add-btn" onclick="addExercise()">+</button>
+                    <input type="text" id="exerciseInput" class="ex-input-wide" list="exerciseOptions" placeholder="Select or type exercise...">
+                    <datalist id="exerciseOptions"></datalist>
                 </div>
+                <div class="exercise-row exercise-row-3">
+                    <div class="ex-field">
+                        <input type="number" id="weightInput" class="ex-input" placeholder="0">
+                        <span class="ex-unit">kg</span>
+                    </div>
+                    <div class="ex-field">
+                        <input type="number" id="setsInput" class="ex-input" placeholder="0">
+                        <span class="ex-unit">sets</span>
+                    </div>
+                    <div class="ex-field">
+                        <input type="number" id="repsInput" class="ex-input" placeholder="0">
+                        <span class="ex-unit">reps</span>
+                    </div>
+                </div>
+                <button class="btn add-exercise-btn" onclick="addExercise()">+ Add Exercise</button>
                 
                 <!-- Optional Details (expandable) -->
                 <div class="optional-toggle" onclick="toggleOptional()">
