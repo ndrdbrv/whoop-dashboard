@@ -468,13 +468,62 @@ DASHBOARD_HTML = """
             gap: 12px;
         }
         
+        .calendar-row {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .time-picker {
+            flex: 0 0 110px;
+            padding: 14px 12px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            color: var(--white);
+            font-size: 13px;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+        
+        .time-picker option {
+            background: #1a1a1a;
+            color: white;
+        }
+        
+        .calendar-row .btn {
+            flex: 1;
+        }
+        
         @media (max-width: 380px) {
             .score { font-size: 88px; }
             .metrics { gap: 24px; }
             .week { gap: 4px; }
             .day { padding: 12px 0; border-radius: 8px; }
+            .calendar-row { flex-direction: column; }
+            .time-picker { flex: 1; }
         }
     </style>
+    <script>
+        function addToGoogleCalendar(title, description, duration, time) {
+            const today = new Date();
+            const [hours, mins] = time.split(':');
+            today.setHours(parseInt(hours), parseInt(mins), 0, 0);
+            
+            const endTime = new Date(today.getTime() + duration * 60000);
+            
+            const formatDate = (d) => {
+                return d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+            };
+            
+            const startStr = formatDate(today);
+            const endStr = formatDate(endTime);
+            
+            const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&details=${encodeURIComponent(description)}&dates=${startStr}/${endStr}`;
+            
+            window.open(url, '_blank');
+        }
+    </script>
 </head>
 <body>
     {% if not authenticated %}
@@ -534,7 +583,27 @@ DASHBOARD_HTML = """
                     <li>{{ step }}</li>
                     {% endfor %}
                 </ul>
-                <a href="/calendar/add?idx={{ loop.index0 }}" class="btn">Add to Calendar</a>
+                <div class="calendar-row">
+                    <select class="time-picker" id="time-{{ loop.index0 }}">
+                        <option value="06:00">6:00 AM</option>
+                        <option value="07:00">7:00 AM</option>
+                        <option value="08:00">8:00 AM</option>
+                        <option value="09:00">9:00 AM</option>
+                        <option value="10:00">10:00 AM</option>
+                        <option value="11:00">11:00 AM</option>
+                        <option value="12:00">12:00 PM</option>
+                        <option value="13:00">1:00 PM</option>
+                        <option value="14:00">2:00 PM</option>
+                        <option value="15:00">3:00 PM</option>
+                        <option value="16:00">4:00 PM</option>
+                        <option value="17:00" selected>5:00 PM</option>
+                        <option value="18:00">6:00 PM</option>
+                        <option value="19:00">7:00 PM</option>
+                        <option value="20:00">8:00 PM</option>
+                        <option value="21:00">9:00 PM</option>
+                    </select>
+                    <button class="btn" onclick="addToGoogleCalendar('{{ workout.title | e }}', '{{ workout.description | e }}', {{ workout.duration_min }}, document.getElementById('time-{{ loop.index0 }}').value)">Add to Google Calendar</button>
+                </div>
             </div>
             {% endfor %}
         </div>
