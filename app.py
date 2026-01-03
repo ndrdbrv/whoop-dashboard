@@ -2,6 +2,7 @@
 """WHOOP Training Dashboard - Sleek Ultra Design"""
 
 import os
+import requests
 from datetime import datetime, timedelta
 from flask import Flask, render_template_string, redirect, request, Response
 from dotenv import load_dotenv
