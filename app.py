@@ -2175,6 +2175,69 @@ def get_logs():
     except Exception as e:
         return {"error": str(e)}, 500
 
+def sync_to_notion(date, exercises, notes):
+    """Sync workout to Notion page"""
+    notion_token = os.environ.get("NOTION_TOKEN")
+    notion_page_id = os.environ.get("NOTION_PAGE_ID")
+    
+    if not notion_token or not notion_page_id:
+        return False
+    
+    try:
+        # Format exercises as text
+        exercise_text = "\n".join([
+            f"• {ex.get('name', 'Exercise')}" + 
+            (f" - {ex.get('weight')}kg" if ex.get('weight') else "") +
+            (f" {ex.get('sets')}×{ex.get('reps')}" if ex.get('sets') and ex.get('reps') else "") +
+            (f" (RPE {ex.get('rpe')})" if ex.get('rpe') else "")
+            for ex in exercises
+        ])
+        
+        # Create a block in the Notion page
+        headers = {
+            "Authorization": f"Bearer {notion_token}",
+            "Content-Type": "application/json",
+            "Notion-Version": "2022-06-28"
+        }
+        
+        # Add workout as a toggle block with exercises inside
+        blocks = [
+            {
+                "object": "block",
+                "type": "toggle",
+                "toggle": {
+                    "rich_text": [{"type": "text", "text": {"content": f"🏋️ {date}"}}],
+                    "children": [
+                        {
+                            "object": "block",
+                            "type": "paragraph",
+                            "paragraph": {
+                                "rich_text": [{"type": "text", "text": {"content": exercise_text}}]
+                            }
+                        }
+                    ] + ([{
+                        "object": "block",
+                        "type": "paragraph", 
+                        "paragraph": {
+                            "rich_text": [{"type": "text", "text": {"content": f"📝 {notes}"}}]
+                        }
+                    }] if notes else [])
+                }
+            }
+        ]
+        
+        response = requests.patch(
+            f"https://api.notion.com/v1/blocks/{notion_page_id}/children",
+            headers=headers,
+            json={"children": blocks}
+        )
+        
+        return response.status_code == 200
+    except Exception as e:
+        print(f"Notion sync error: {e}")
+        return False
+
+
 @app.route("/api/logs", methods=["POST"])
 def save_logs():
     """Save exercise logs for the current user"""
@@ -2190,7 +2253,19 @@ def save_logs():
         with open(log_path, "w") as f:
             json.dump(data, f, indent=2)
         
-        return {"status": "saved"}
+        # Sync latest day to Notion
+        notion_synced = False
+        if data:
+            latest_date = max(data.keys())
+            latest_workout = data[latest_date]
+            if latest_workout.get("exercises"):
+                notion_synced = sync_to_notion(
+                    latest_date, 
+                    latest_workout["exercises"],
+                    latest_workout.get("notes", "")
+                )
+        
+        return {"status": "saved", "notion_synced": notion_synced}
     except Exception as e:
         return {"error": str(e)}, 500
 
