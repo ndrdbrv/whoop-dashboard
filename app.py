@@ -1035,6 +1035,20 @@ DASHBOARD_HTML = """
             white-space: pre-wrap;
         }
         
+        .btn-copy {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 4px 10px;
+            font-size: 11px;
+            color: var(--white-40);
+            cursor: pointer;
+        }
+        
+        .btn-copy:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
         .calendar-row {
             display: flex;
             gap: 10px;
@@ -1438,6 +1452,21 @@ DASHBOARD_HTML = """
             }
         }
         
+        function copyWorkout(text) {
+            const decoded = text.replace(/\\n/g, '\n');
+            navigator.clipboard.writeText(decoded).then(() => {
+                // Show brief feedback
+                const btn = event.target;
+                const original = btn.textContent;
+                btn.textContent = '✓ Copied!';
+                btn.style.background = 'rgba(34, 197, 94, 0.2)';
+                setTimeout(() => {
+                    btn.textContent = original;
+                    btn.style.background = '';
+                }, 1500);
+            });
+        }
+        
         function showHistory() {
             const logs = JSON.parse(localStorage.getItem('exerciseLogs') || '{}');
             const historyDiv = document.getElementById('logHistory');
@@ -1452,7 +1481,7 @@ DASHBOARD_HTML = """
                 return;
             }
             
-            historyDiv.innerHTML = sortedDates.map(date => {
+            historyDiv.innerHTML = sortedDates.map((date, idx) => {
                 const log = logs[date];
                 const dateObj = new Date(date + 'T12:00:00');
                 const formatted = dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
@@ -1464,8 +1493,20 @@ DASHBOARD_HTML = """
                     return line;
                 }).join('<br>');
                 
+                // Create copyable text format
+                const copyText = '🏋️ ' + formatted + '\\n' + log.exercises.map(ex => {
+                    let line = '• ' + formatExerciseName(ex.name);
+                    if (ex.weight) line += ' ' + ex.weight + 'kg';
+                    if (ex.sets && ex.reps) line += ' ' + ex.sets + 'x' + ex.reps;
+                    if (ex.rpe) line += ' (RPE ' + ex.rpe + ')';
+                    return line;
+                }).join('\\n') + (log.notes ? '\\n📝 ' + log.notes : '');
+                
                 return '<div class="log-history-item">' +
+                    '<div style="display: flex; justify-content: space-between; align-items: center;">' +
                     '<div class="log-history-date">' + formatted + ' (' + log.exercises.length + ' exercises)</div>' +
+                    '<button class="btn-copy" onclick="copyWorkout(\'' + copyText.replace(/'/g, "\\'") + '\')">📋 Copy</button>' +
+                    '</div>' +
                     '<div class="log-history-text">' + exerciseList + (log.notes ? '<br><em>' + log.notes + '</em>' : '') + '</div>' +
                 '</div>';
             }).join('');
