@@ -25,87 +25,122 @@ class WorkoutGenerator:
         "rest": [],
         "easy": [
             {
-                "title": "Easy Climbing - Technique Focus",
+                "title": "Easy Climbing + Finger Maintenance",
                 "duration": 60,
-                "description": "Light session focusing on movement quality",
+                "description": "Light session with low-intensity finger work",
                 "details": [
                     "Warm up: 15 min easy traversing",
-                    "Main: Routes 2-3 grades below max",
-                    "Focus on footwork and body positioning",
-                    "No limit bouldering or projecting",
-                    "Cool down: Light stretching"
+                    "Hangboard: 3x10s half crimp @ bodyweight",
+                    "Climb 2-3 grades below max",
+                    "Focus on open-hand grip on easy holds",
+                    "Finger rolls with light weight: 3x15",
+                    "Cool down: Finger stretches + rice bucket"
                 ],
                 "strain": (5, 8)
             },
             {
-                "title": "Volume Session - Easy Mileage",
+                "title": "Volume Session - Grip Endurance",
                 "duration": 75,
-                "description": "High volume, low intensity climbing",
+                "description": "High volume for finger stamina",
                 "details": [
-                    "Warm up: 10 min cardio + dynamic stretches",
-                    "Climb 15-20 easy routes/problems",
-                    "Rest 1-2 min between climbs",
-                    "Focus on efficiency and flow",
-                    "No falls - if you're falling, go easier"
+                    "Warm up: 10 min + progressive hangs",
+                    "Climb 15-20 easy problems focusing on grip",
+                    "Vary grip types: open, half crimp, pinch",
+                    "Repeaters: 7s on/3s off x6 (half crimp)",
+                    "Rest 3 min, repeat 2-3 sets",
+                    "Cool down: Reverse wrist curls + stretching"
                 ],
                 "strain": (6, 9)
             }
         ],
         "moderate": [
             {
-                "title": "Endurance Builder",
+                "title": "Hangboard - Repeaters Protocol",
                 "duration": 90,
-                "description": "Build climbing stamina with moderate intensity",
+                "description": "Build finger endurance with repeaters",
                 "details": [
-                    "Warm up: 20 min progressive difficulty",
-                    "4x4s: 4 problems, 4 sets, minimal rest between problems",
-                    "Problems should be moderate (flash grade -1)",
-                    "3-4 min rest between sets",
-                    "Cool down: Easy routes + stretching"
+                    "Warm up: 20 min climbing + progressive hangs",
+                    "Repeaters: 7s on/3s off x6 reps per set",
+                    "4-6 sets on 20mm edge (half crimp)",
+                    "2-3 sets on slopers or pinch block",
+                    "3 min rest between sets",
+                    "Finish with easy climbing: 15-20 min"
                 ],
                 "strain": (10, 13)
             },
             {
-                "title": "Technique + Moderate Routes",
+                "title": "Finger Strength + Crimpy Problems",
                 "duration": 90,
-                "description": "Work on weaknesses at moderate intensity",
+                "description": "Target crimp strength on small holds",
                 "details": [
-                    "Warm up: 15 min easy climbing",
-                    "Drills: 20 min focused skill work",
-                    "Pick a weakness: slopers, crimps, overhangs, slabs",
-                    "Main: Routes at onsight grade",
-                    "2-3 min rest between attempts",
-                    "Cool down: Antagonist exercises"
+                    "Warm up: 15 min easy + finger prep",
+                    "Max hangs: 10s x5 on 18-20mm edge",
+                    "Add weight if >15s feels easy",
+                    "Rest 3 min between hangs",
+                    "Climb: Seek out crimpy problems at moderate grade",
+                    "Pinch block: 3x10s max effort holds",
+                    "Cool down: Antagonist + finger stretches"
                 ],
                 "strain": (9, 12)
+            },
+            {
+                "title": "Open Hand + Sloper Training",
+                "duration": 75,
+                "description": "Build open-hand and sloper strength",
+                "details": [
+                    "Warm up: 20 min progressive",
+                    "Open hand hangs: 10s x5 on 35° sloper",
+                    "Sloper problems: Focus on body tension",
+                    "Pinch training: 3x8s each hand",
+                    "Compression drills on steep terrain",
+                    "Cool down: Wrist curls + finger extensions"
+                ],
+                "strain": (8, 11)
             }
         ],
         "hard": [
             {
-                "title": "Project Session",
-                "duration": 120,
-                "description": "Work your hardest routes/problems",
+                "title": "Max Hangs - Strength Protocol",
+                "duration": 90,
+                "description": "Maximum finger recruitment for strength gains",
                 "details": [
-                    "Extended warm up: 30 min progressive",
-                    "Project work: Pick 1-2 hard projects",
-                    "Full rest between attempts (3-5 min)",
-                    "Quality over quantity - max 8-10 hard attempts",
-                    "Stop if power drops noticeably",
-                    "Cool down: Easy climbing + stretching"
+                    "Extended warm up: 30 min climbing + hangs",
+                    "Max hangs: 10s x5-6 on 18mm edge",
+                    "Add weight until 10s is near-max effort",
+                    "Full rest: 3-5 min between hangs",
+                    "Vary grips: Half crimp → Full crimp → 3-finger drag",
+                    "One-arm progressions if strong enough",
+                    "Total finger time: ~60-90s hard effort"
+                ],
+                "strain": (12, 15)
+            },
+            {
+                "title": "Limit Bouldering + Finger Power",
+                "duration": 120,
+                "description": "Maximum power on small holds",
+                "details": [
+                    "Warm up: 30 min including progressive hangs",
+                    "Max hangs: 5s x4 heavy (near 1RM)",
+                    "Limit boulders: Focus on hard finger moves",
+                    "Seek out crimpy crux sequences",
+                    "Full recovery between attempts (4-5 min)",
+                    "Campus board: Ladders on small rungs (optional)",
+                    "Stop when power drops"
                 ],
                 "strain": (14, 17)
             },
             {
-                "title": "Limit Bouldering",
-                "duration": 90,
-                "description": "Maximum power and hard moves",
+                "title": "One-Arm Progressions",
+                "duration": 75,
+                "description": "Advanced finger strength development",
                 "details": [
-                    "Warm up: 25 min including easy problems",
-                    "Limit boulders: 2-3 grades above flash level",
-                    "Work single hard moves or short sequences",
-                    "Full recovery between attempts (4-5 min)",
-                    "Total hard attempts: 15-20 max",
-                    "Stop before fatigue compromises form"
+                    "Warm up: 25 min + two-arm max hangs",
+                    "One-arm hangs: Assisted with pulley",
+                    "5s x3 each hand on 20mm",
+                    "Reduce assistance progressively",
+                    "Min edge hangs: Find your limit edge",
+                    "Offset hangs: 70/30 weight distribution",
+                    "Cool down: Easy climbing + stretching"
                 ],
                 "strain": (13, 16)
             }
