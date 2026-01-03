@@ -2168,7 +2168,8 @@ def get_user_log_path(user_id):
 @app.route("/api/logs", methods=["GET"])
 def get_logs():
     """Get all exercise logs for the current user"""
-    if not client.access_token:
+    client = get_client()
+    if not client:
         return {"error": "Not authenticated"}, 401
     
     try:
@@ -2249,7 +2250,8 @@ def sync_to_notion(date, exercises, notes):
 @app.route("/api/logs", methods=["POST"])
 def save_logs():
     """Save exercise logs for the current user"""
-    if not client.access_token:
+    client = get_client()
+    if not client:
         return {"error": "Not authenticated"}, 401
     
     try:
@@ -2280,7 +2282,8 @@ def save_logs():
 @app.route("/api/logs/export")
 def export_logs():
     """Export exercise logs as JSON download"""
-    if not client.access_token:
+    client = get_client()
+    if not client:
         return {"error": "Not authenticated"}, 401
     
     try:
