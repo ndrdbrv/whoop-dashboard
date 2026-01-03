@@ -2066,8 +2066,13 @@ def health():
 import json
 import os
 
-LOGS_DIR = "user_logs"
-os.makedirs(LOGS_DIR, exist_ok=True)
+# Use /data for Railway persistent volume, fallback to local
+LOGS_DIR = os.environ.get("LOGS_DIR", "/data/user_logs")
+try:
+    os.makedirs(LOGS_DIR, exist_ok=True)
+except:
+    LOGS_DIR = "user_logs"  # Fallback for local dev
+    os.makedirs(LOGS_DIR, exist_ok=True)
 
 def get_user_log_path(user_id):
     return os.path.join(LOGS_DIR, f"{user_id}.json")
