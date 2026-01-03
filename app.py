@@ -1873,13 +1873,17 @@ def index():
         
         # Group activities by date
         activities_by_date = {}
-        for w in workouts_data[:10]:  # Get more workouts for history
+        for w in workouts_data[:15]:  # Get more workouts for history
             if w.get("score_state") == "SCORED" and w.get("score"):
                 sport = w.get("sport_name", "activity")
                 # Clean up the sport name - only show "General Activity" if truly generic
                 sport_clean = sport.replace("_", " ").strip()
-                if sport_clean.lower() in ["activity", "other", ""]:
+                if sport_clean.lower() in ["activity", "other", "functional fitness", ""]:
                     sport_clean = "General Activity"
+                elif "sauna" in sport_clean.lower():
+                    sport_clean = "Sauna"
+                elif "heat" in sport_clean.lower():
+                    sport_clean = "Sauna"
                 else:
                     sport_clean = sport_clean.title()
                 
@@ -1951,7 +1955,7 @@ def index():
                 sleep_end = datetime.fromisoformat(latest_sleep["end"].replace("Z", "+00:00"))
                 
                 sleep_stages = {
-                    "date": sleep_start.strftime("%b %d"),
+                    "date": sleep_end.strftime("%b %d"),  # Show wake date, not sleep start
                     "performance": int(sc.get("sleep_performance_percentage", 0)),
                     "efficiency": int(sc.get("sleep_efficiency_percentage", 0)),
                     "total_in_bed": f"{total_in_bed['hr']}h {total_in_bed['min']}m",

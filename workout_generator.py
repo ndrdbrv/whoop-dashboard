@@ -391,11 +391,19 @@ class WorkoutGenerator:
                 secondary.title = "Optional: " + secondary.title
                 workouts.append(secondary)
         
-        # Add sauna for moderate/easy days
-        if zone in ["easy", "moderate"] and random.random() > 0.5:
-            sauna = self.generate_workout("sauna", "any")
-            if sauna:
-                workouts.append(sauna)
+        # Always add sauna for recovery - adjust duration based on recovery
+        sauna = self.generate_workout("sauna", "any")
+        if sauna:
+            if recovery_score >= 67:
+                sauna.duration_min = 20  # High recovery = longer sauna
+                sauna.description = "Recovery sauna - great day for heat therapy"
+            elif recovery_score >= 34:
+                sauna.duration_min = 15
+                sauna.description = "Moderate sauna session for circulation"
+            else:
+                sauna.duration_min = 10
+                sauna.description = "Light sauna to aid recovery"
+            workouts.append(sauna)
         
         return [w for w in workouts if w is not None]
 
