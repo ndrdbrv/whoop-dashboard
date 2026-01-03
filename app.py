@@ -1602,11 +1602,11 @@ DASHBOARD_HTML = """
             
             <!-- Past Logs -->
             <div id="logHistory" class="log-history" style="display: none; margin-top: 16px;"></div>
-            <div style="display: flex; gap: 8px; margin-top: 12px;">
-                <button class="btn btn-secondary" style="flex: 1;" onclick="toggleHistory()">
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
+                <button class="btn btn-secondary" style="width: 100%;" onclick="toggleHistory()">
                     <span id="historyBtnText">Show Workout History</span>
                 </button>
-                <a href="/api/logs/export" class="btn btn-secondary" style="flex: 0 0 auto; text-decoration: none;">📥 Export</a>
+                <a href="/api/logs/export" class="btn btn-secondary" style="width: 100%; text-align: center; text-decoration: none;">📥 Export to JSON</a>
             </div>
         </div>
         
