@@ -111,28 +111,52 @@ DASHBOARD_HTML = """
             padding: 0 24px 120px;
         }
         
-        .setup-link {
-            display: block;
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            gap: 12px;
+        }
+        
+        .setup-link, .refresh-link {
+            flex: 1;
             text-align: center;
-            padding: 14px;
-            margin: 16px 0;
+            padding: 12px 16px;
             background: rgba(96, 165, 250, 0.1);
             border: 1px solid rgba(96, 165, 250, 0.2);
             border-radius: 12px;
             color: #60a5fa;
             text-decoration: none;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
+        }
+        
+        .refresh-link {
+            background: rgba(74, 222, 128, 0.1);
+            border-color: rgba(74, 222, 128, 0.2);
+            color: #4ade80;
         }
         
         .setup-link:hover {
             background: rgba(96, 165, 250, 0.15);
         }
         
+        .refresh-link:hover {
+            background: rgba(74, 222, 128, 0.15);
+        }
+        
         /* Header */
         .header {
             padding: 80px 0 60px;
             text-align: center;
+        }
+        
+        .header-date {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--white-60);
+            margin-bottom: 8px;
         }
         
         .header-label {
@@ -459,6 +483,20 @@ DASHBOARD_HTML = """
         }
         
         /* Activity */
+        .day-group {
+            margin-bottom: 20px;
+        }
+        
+        .day-group-header {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--white-40);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 10px;
+            padding-left: 4px;
+        }
+        
         .activity-list {
             display: flex;
             flex-direction: column;
@@ -1346,8 +1384,12 @@ DASHBOARD_HTML = """
     {% else %}
     <div class="mountain-bg"></div>
     <div class="app">
-        <a href="/settings" class="setup-link">⚙ Edit Training Plan</a>
+        <div class="top-bar">
+            <a href="/settings" class="setup-link">⚙ Edit Training Plan</a>
+            <a href="/" class="refresh-link" onclick="this.innerHTML='↻ Refreshing...'">↻ Refresh</a>
+        </div>
         <div class="header">
+            <div class="header-date">{{ current_date }}</div>
             <div class="header-label">{{ user_name }}</div>
             <div class="score {{ score_color }}">{{ recovery_score }}</div>
             <div class="score-label">Recovery</div>
@@ -1544,38 +1586,43 @@ DASHBOARD_HTML = """
         
         <div class="section">
             <div class="section-title">Recent Workouts</div>
-            <div class="activity-list">
-                {% for activity in recent_activities %}
-                <div class="activity-card">
-                    <div class="activity-header">
-                        <span class="activity-icon">{{ activity.icon }}</span>
-                        <div class="activity-info">
-                            <div class="activity-name">{{ activity.name }}</div>
-                            <div class="activity-time">{{ activity.time }}</div>
+            {% for date_key, day_data in recent_days %}
+            <div class="day-group">
+                <div class="day-group-header">{{ day_data.date }}</div>
+                <div class="activity-list">
+                    {% for activity in day_data.activities %}
+                    <div class="activity-card">
+                        <div class="activity-header">
+                            <span class="activity-icon">{{ activity.icon }}</span>
+                            <div class="activity-info">
+                                <div class="activity-name">{{ activity.name }}</div>
+                                <div class="activity-time">{{ activity.time }}</div>
+                            </div>
+                            <div class="activity-strain-badge">{{ activity.strain }}</div>
                         </div>
-                        <div class="activity-strain-badge">{{ activity.strain }}</div>
+                        <div class="activity-stats">
+                            <div class="activity-stat">
+                                <span class="stat-value">{{ activity.duration }}</span>
+                                <span class="stat-label">min</span>
+                            </div>
+                            <div class="activity-stat">
+                                <span class="stat-value">{{ activity.max_hr }}</span>
+                                <span class="stat-label">max HR</span>
+                            </div>
+                            <div class="activity-stat">
+                                <span class="stat-value">{{ activity.avg_hr }}</span>
+                                <span class="stat-label">avg HR</span>
+                            </div>
+                            <div class="activity-stat">
+                                <span class="stat-value">{{ activity.calories }}</span>
+                                <span class="stat-label">kcal</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="activity-stats">
-                        <div class="activity-stat">
-                            <span class="stat-value">{{ activity.duration }}</span>
-                            <span class="stat-label">min</span>
-                        </div>
-                        <div class="activity-stat">
-                            <span class="stat-value">{{ activity.max_hr }}</span>
-                            <span class="stat-label">max HR</span>
-                        </div>
-                        <div class="activity-stat">
-                            <span class="stat-value">{{ activity.avg_hr }}</span>
-                            <span class="stat-label">avg HR</span>
-                        </div>
-                        <div class="activity-stat">
-                            <span class="stat-value">{{ activity.calories }}</span>
-                            <span class="stat-label">kcal</span>
-                        </div>
-                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
             </div>
+            {% endfor %}
         </div>
         
         {% if sleep_stages %}
@@ -1792,49 +1839,60 @@ def index():
                 "rhr": rhr_val
             })
         
-        recent_activities = []
-        for w in workouts_data[:5]:
+        # Group activities by date
+        activities_by_date = {}
+        for w in workouts_data[:10]:  # Get more workouts for history
             if w.get("score_state") == "SCORED" and w.get("score"):
                 sport = w.get("sport_name", "activity")
-                # Clean up the sport name
-                if sport.lower() == "activity" or not sport:
-                    sport = "General Activity"
+                # Clean up the sport name - only show "General Activity" if truly generic
+                sport_clean = sport.replace("_", " ").strip()
+                if sport_clean.lower() in ["activity", "other", ""]:
+                    sport_clean = "General Activity"
+                else:
+                    sport_clean = sport_clean.title()
                 
                 score = w["score"]
                 strain = round(score.get("strain", 0), 1)
                 max_hr = score.get("max_heart_rate", 0)
                 avg_hr = score.get("average_heart_rate", 0)
-                calories = round(score.get("kilojoule", 0) / 4.184)  # Convert kJ to kcal
+                calories = round(score.get("kilojoule", 0) / 4.184)
                 
-                # Calculate duration
                 start = datetime.fromisoformat(w["start"].replace("Z", "+00:00"))
                 end = datetime.fromisoformat(w["end"].replace("Z", "+00:00"))
                 duration_mins = int((end - start).total_seconds() / 60)
                 
-                # Format time
-                workout_time = start.strftime("%b %d, %H:%M")
+                date_key = start.strftime("%Y-%m-%d")
+                date_display = start.strftime("%a, %b %d")
+                workout_time = start.strftime("%H:%M")
                 
                 icon = "💪"
-                sport_lower = sport.lower()
+                sport_lower = sport_clean.lower()
                 if "climb" in sport_lower or "boulder" in sport_lower: icon = "🧗"
                 elif "run" in sport_lower: icon = "🏃"
-                elif "gym" in sport_lower or "fitness" in sport_lower or "weight" in sport_lower: icon = "🏋️"
+                elif "functional" in sport_lower or "fitness" in sport_lower or "weight" in sport_lower or "strength" in sport_lower: icon = "🏋️"
                 elif "sauna" in sport_lower or "heat" in sport_lower: icon = "🧖"
                 elif "cycling" in sport_lower or "bike" in sport_lower: icon = "🚴"
                 elif "swim" in sport_lower: icon = "🏊"
-                elif "yoga" in sport_lower: icon = "🧘"
+                elif "yoga" in sport_lower or "stretching" in sport_lower: icon = "🧘"
                 elif "walk" in sport_lower or "hike" in sport_lower: icon = "🚶"
                 
-                recent_activities.append({
+                activity = {
                     "icon": icon, 
-                    "name": sport.replace("_", " ").title()[:20], 
+                    "name": sport_clean[:20], 
                     "strain": strain,
                     "duration": duration_mins,
                     "max_hr": max_hr,
                     "avg_hr": avg_hr,
                     "calories": calories,
                     "time": workout_time
-                })
+                }
+                
+                if date_key not in activities_by_date:
+                    activities_by_date[date_key] = {"date": date_display, "activities": []}
+                activities_by_date[date_key]["activities"].append(activity)
+        
+        # Convert to list sorted by date (newest first)
+        recent_days = sorted(activities_by_date.items(), key=lambda x: x[0], reverse=True)[:5]
         
         # Get sleep stages from latest sleep
         sleep_stages = None
@@ -1890,8 +1948,9 @@ def index():
             warnings=recommendation.warnings,
             weekly_recovery=weekly_recovery,
             weekly_suggestion=weekly.get("suggestion", ""),
-            recent_activities=recent_activities,
+            recent_days=recent_days,
             sleep_stages=sleep_stages,
+            current_date=datetime.now().strftime("%A, %B %d"),
             updated_at=datetime.now().strftime("%H:%M")
         )
         
