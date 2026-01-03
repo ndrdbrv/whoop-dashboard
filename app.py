@@ -1396,13 +1396,13 @@ DASHBOARD_HTML = """
         
         // Daily Warmup - rotates based on day
         const climbingWarmups = [
-            { exercises: ["Finger Flicks", "Wrist Circles", "Forearm Stretch", "Easy Traverse"], tip: "Focus on blood flow before touching holds" },
-            { exercises: ["Prayer Stretch", "Reverse Prayer", "Scapular Push Ups", "Jug Ladder"], tip: "Open up the shoulders and activate scapula" },
-            { exercises: ["Rice Bucket", "Tendon Glides", "Pull Up Hang", "Easy Boulders V0-V2"], tip: "Finger health day - go slow on crimps" },
-            { exercises: ["Hip Opener Squats", "Deep Squat Hold", "Arm Swings", "Light Traverse"], tip: "Lower body mobility for better footwork" },
-            { exercises: ["Finger Extensions with Band", "Shoulder Shrugs", "Elbow Circles", "Easy Overhang"], tip: "Antagonist work to prevent injury" },
-            { exercises: ["Ankle Mobility", "Cat Cow", "Thread the Needle", "Slab Climbing"], tip: "Balance and body awareness focus" },
-            { exercises: ["Forearm Massage", "Finger Rolls", "Light Hangboard Open", "Volume Boulders"], tip: "Recovery day warmup - keep it light" }
+            { exercises: ["Finger Flicks", "Wrist Circles", "10s Dead Hang", "Progressive Hangs"], tip: "Blood flow to fingers before loading" },
+            { exercises: ["Tendon Glides", "Finger Extensions", "Half Crimp 3x5s", "Easy Jugs"], tip: "Wake up the tendons slowly" },
+            { exercises: ["Rice Bucket 2min", "Forearm Stretch", "Open Hand Hangs", "Pinch Block"], tip: "Finger health focus - prioritize open hand" },
+            { exercises: ["Prayer Stretch", "Reverse Prayer", "3-Finger Drag Hang", "Easy Crimps"], tip: "Stretch then load - progress grip types" },
+            { exercises: ["Finger Curls Light", "Wrist Rotations", "Half Crimp 5x5s", "Sloper Hangs"], tip: "Build finger temperature gradually" },
+            { exercises: ["Forearm Massage", "Tendon Glides", "Max Hang 50%", "Jug Ladder"], tip: "Self-massage before any hard pulls" },
+            { exercises: ["Band Extensions", "Finger Rolls", "Repeaters 7on/3off", "Easy Traverse"], tip: "Antagonist + finger pump for warmth" }
         ];
         
         function showDailyWarmup() {
