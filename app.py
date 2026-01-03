@@ -1218,7 +1218,7 @@ DASHBOARD_HTML = """
             }).join('');
         }
         
-        function saveWorkout() {
+        async function saveWorkout() {
             const notes = document.getElementById('workoutNotes').value;
             const logs = JSON.parse(localStorage.getItem('exerciseLogs') || '{}');
             
@@ -1230,6 +1230,17 @@ DASHBOARD_HTML = """
             logs[today].notes = notes;
             logs[today].savedAt = new Date().toLocaleTimeString('en-US', {hour: '2-digit', minute: '2-digit'});
             localStorage.setItem('exerciseLogs', JSON.stringify(logs));
+            
+            // Sync to server
+            try {
+                await fetch('/api/logs', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(logs)
+                });
+            } catch (e) {
+                console.log('Server sync failed, saved locally');
+            }
             
             // Show success feedback
             const btn = document.querySelector('.save-workout-btn');
@@ -1247,6 +1258,23 @@ DASHBOARD_HTML = """
             }, 2000);
         }
         
+        async function loadLogsFromServer() {
+            try {
+                const res = await fetch('/api/logs');
+                if (res.ok) {
+                    const serverLogs = await res.json();
+                    const localLogs = JSON.parse(localStorage.getItem('exerciseLogs') || '{}');
+                    // Merge: server wins for older dates, local wins for today
+                    const merged = {...serverLogs, ...localLogs};
+                    localStorage.setItem('exerciseLogs', JSON.stringify(merged));
+                    renderExerciseList();
+                    loadWorkoutNotes();
+                }
+            } catch (e) {
+                console.log('Could not load from server');
+            }
+        }
+        
         function loadWorkoutNotes() {
             const logs = JSON.parse(localStorage.getItem('exerciseLogs') || '{}');
             const notesField = document.getElementById('workoutNotes');
@@ -1258,6 +1286,7 @@ DASHBOARD_HTML = """
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             initExerciseDB();
+            loadLogsFromServer();  // Load from server first, then render
             renderExerciseList();
             loadWorkoutNotes();
         });
@@ -1492,9 +1521,12 @@ DASHBOARD_HTML = """
             
             <!-- Past Logs -->
             <div id="logHistory" class="log-history" style="display: none; margin-top: 16px;"></div>
-            <button class="btn btn-secondary" style="width: 100%; margin-top: 12px;" onclick="toggleHistory()">
-                <span id="historyBtnText">Show Workout History</span>
-            </button>
+            <div style="display: flex; gap: 8px; margin-top: 12px;">
+                <button class="btn btn-secondary" style="flex: 1;" onclick="toggleHistory()">
+                    <span id="historyBtnText">Show Workout History</span>
+                </button>
+                <a href="/api/logs/export" class="btn btn-secondary" style="flex: 0 0 auto; text-decoration: none;">📥 Export</a>
+            </div>
         </div>
         
         <div class="section">
@@ -2023,6 +2055,82 @@ def add_to_calendar():
 @app.route("/health")
 def health():
     return {"status": "ok"}
+
+
+# Exercise log storage
+import json
+import os
+
+LOGS_DIR = "user_logs"
+os.makedirs(LOGS_DIR, exist_ok=True)
+
+def get_user_log_path(user_id):
+    return os.path.join(LOGS_DIR, f"{user_id}.json")
+
+@app.route("/api/logs", methods=["GET"])
+def get_logs():
+    """Get all exercise logs for the current user"""
+    if not client.access_token:
+        return {"error": "Not authenticated"}, 401
+    
+    try:
+        profile = client.get_profile()
+        user_id = profile.get("user_id", "default")
+        log_path = get_user_log_path(user_id)
+        
+        if os.path.exists(log_path):
+            with open(log_path, "r") as f:
+                return json.load(f)
+        return {}
+    except Exception as e:
+        return {"error": str(e)}, 500
+
+@app.route("/api/logs", methods=["POST"])
+def save_logs():
+    """Save exercise logs for the current user"""
+    if not client.access_token:
+        return {"error": "Not authenticated"}, 401
+    
+    try:
+        profile = client.get_profile()
+        user_id = profile.get("user_id", "default")
+        log_path = get_user_log_path(user_id)
+        
+        data = request.get_json()
+        with open(log_path, "w") as f:
+            json.dump(data, f, indent=2)
+        
+        return {"status": "saved"}
+    except Exception as e:
+        return {"error": str(e)}, 500
+
+@app.route("/api/logs/export")
+def export_logs():
+    """Export exercise logs as JSON download"""
+    if not client.access_token:
+        return {"error": "Not authenticated"}, 401
+    
+    try:
+        profile = client.get_profile()
+        user_id = profile.get("user_id", "default")
+        user_name = f"{profile.get('first_name', '')}_{profile.get('last_name', '')}".strip("_") or "user"
+        log_path = get_user_log_path(user_id)
+        
+        if os.path.exists(log_path):
+            with open(log_path, "r") as f:
+                data = json.load(f)
+        else:
+            data = {}
+        
+        from flask import Response
+        response = Response(
+            json.dumps(data, indent=2),
+            mimetype="application/json",
+            headers={"Content-Disposition": f"attachment;filename=workout_logs_{user_name}.json"}
+        )
+        return response
+    except Exception as e:
+        return {"error": str(e)}, 500
 
 
 @app.route("/settings")
