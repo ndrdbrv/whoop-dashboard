@@ -2146,12 +2146,20 @@ def health():
 import json
 import os
 
-# Use /data for Railway persistent volume, fallback to local
-LOGS_DIR = os.environ.get("LOGS_DIR", "/data/user_logs")
+# Use environment variable, /tmp for Railway (always writable), or local fallback
+LOGS_DIR = os.environ.get("LOGS_DIR")
+if not LOGS_DIR:
+    # Check if /tmp is available (Railway/Heroku)
+    if os.path.exists("/tmp") and os.access("/tmp", os.W_OK):
+        LOGS_DIR = "/tmp/user_logs"
+    else:
+        LOGS_DIR = "user_logs"
+
 try:
     os.makedirs(LOGS_DIR, exist_ok=True)
-except:
-    LOGS_DIR = "user_logs"  # Fallback for local dev
+except Exception as e:
+    print(f"Failed to create {LOGS_DIR}: {e}")
+    LOGS_DIR = "/tmp/user_logs"
     os.makedirs(LOGS_DIR, exist_ok=True)
 
 def get_user_log_path(user_id):
