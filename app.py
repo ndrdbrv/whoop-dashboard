@@ -1994,16 +1994,14 @@ def index():
         )
         
     except requests.exceptions.HTTPError as e:
-        # If 401, clear tokens and redirect to login
-        if e.response and e.response.status_code == 401:
-            try:
-                import os
+        # On any HTTP error (especially 401), clear tokens and redirect to login
+        try:
+            import os
+            if os.path.exists(".whoop_tokens.json"):
                 os.remove(".whoop_tokens.json")
-            except:
-                pass
-            return render_template_string(DASHBOARD_HTML, authenticated=False, auth_url=auth_url)
-        import traceback
-        return f"<pre>{traceback.format_exc()}</pre>", 500
+        except:
+            pass
+        return render_template_string(DASHBOARD_HTML, authenticated=False, auth_url=auth_url)
     except Exception as e:
         import traceback
         return f"<pre>{traceback.format_exc()}</pre>", 500
