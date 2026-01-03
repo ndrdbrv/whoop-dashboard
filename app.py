@@ -1443,12 +1443,12 @@ DASHBOARD_HTML = """
             const historyDiv = document.getElementById('logHistory');
             
             const sortedDates = Object.keys(logs)
-                .filter(d => d !== today && logs[d].exercises && logs[d].exercises.length > 0)
+                .filter(d => logs[d].exercises && logs[d].exercises.length > 0)
                 .sort((a, b) => new Date(b) - new Date(a))
                 .slice(0, 14);
             
             if (sortedDates.length === 0) {
-                historyDiv.innerHTML = '<div style="text-align: center; color: var(--white-20); padding: 20px;">No past workouts logged yet</div>';
+                historyDiv.innerHTML = '<div style="text-align: center; color: var(--white-20); padding: 20px;">No workouts logged yet</div>';
                 return;
             }
             
@@ -2280,15 +2280,19 @@ def save_logs():
         
         # Sync latest day to Notion
         notion_synced = False
+        print(f"Save logs: data keys = {list(data.keys()) if data else 'empty'}")
         if data:
             latest_date = max(data.keys())
             latest_workout = data[latest_date]
+            print(f"Latest date: {latest_date}, exercises count: {len(latest_workout.get('exercises', []))}")
             if latest_workout.get("exercises"):
+                print(f"Calling sync_to_notion for {latest_date}")
                 notion_synced = sync_to_notion(
                     latest_date, 
                     latest_workout["exercises"],
                     latest_workout.get("notes", "")
                 )
+                print(f"Notion sync result: {notion_synced}")
         
         return {"status": "saved", "notion_synced": notion_synced}
     except Exception as e:
