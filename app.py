@@ -2189,8 +2189,16 @@ def sync_to_notion(date, exercises, notes):
     notion_token = os.environ.get("NOTION_TOKEN")
     notion_page_id = os.environ.get("NOTION_PAGE_ID")
     
+    print(f"Notion sync: token={'set' if notion_token else 'NOT SET'}, page_id={notion_page_id}")
+    
     if not notion_token or not notion_page_id:
+        print("Notion sync skipped: missing credentials")
         return False
+    
+    # Format page_id with dashes if needed (Notion API format)
+    if len(notion_page_id) == 32 and '-' not in notion_page_id:
+        notion_page_id = f"{notion_page_id[:8]}-{notion_page_id[8:12]}-{notion_page_id[12:16]}-{notion_page_id[16:20]}-{notion_page_id[20:]}"
+        print(f"Formatted page_id: {notion_page_id}")
     
     try:
         # Format exercises as text
@@ -2241,7 +2249,14 @@ def sync_to_notion(date, exercises, notes):
             json={"children": blocks}
         )
         
-        return response.status_code == 200
+        print(f"Notion API response: {response.status_code} - {response.text[:200] if response.text else 'no body'}")
+        
+        if response.status_code == 200:
+            print("Notion sync SUCCESS")
+            return True
+        else:
+            print(f"Notion sync FAILED: {response.status_code}")
+            return False
     except Exception as e:
         print(f"Notion sync error: {e}")
         return False
