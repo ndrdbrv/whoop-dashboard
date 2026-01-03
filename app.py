@@ -1106,6 +1106,19 @@ DASHBOARD_HTML = """
             window.open(url, '_blank');
         }
         
+        // Calendar button event delegation
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('btn-calendar')) {
+                const btn = e.target;
+                const title = btn.dataset.title;
+                const desc = btn.dataset.desc;
+                const duration = parseInt(btn.dataset.duration);
+                const timeId = btn.dataset.timeId;
+                const time = document.getElementById(timeId).value;
+                addToGoogleCalendar(title, desc, duration, time);
+            }
+        });
+        
         // Exercise Database
         const exerciseDB = {
             categories: [
@@ -1690,7 +1703,7 @@ DASHBOARD_HTML = """
                         <option value="20:00">8:00 PM</option>
                         <option value="21:00">9:00 PM</option>
                     </select>
-                    <button class="btn" onclick="addToGoogleCalendar('{{ workout.title | e }}', '{{ workout.description | e }}', {{ workout.duration_min }}, document.getElementById('time-{{ loop.index0 }}').value)">Add to Google Calendar</button>
+                    <button class="btn btn-calendar" data-title="{{ workout.title | e }}" data-desc="{{ workout.description | e }}" data-duration="{{ workout.duration_min }}" data-time-id="time-{{ loop.index0 }}">Add to Google Calendar</button>
                 </div>
             </div>
             {% endfor %}
@@ -1856,16 +1869,18 @@ def index():
     global _current_workouts
     client = get_client()
     
+    # Build auth URL for login
+    from urllib.parse import urlencode
+    params = {
+        "client_id": CLIENT_ID,
+        "redirect_uri": REDIRECT_URI,
+        "response_type": "code",
+        "scope": " ".join(SCOPES),
+        "state": "dashboard"
+    }
+    auth_url = f"{AUTH_URL}?{urlencode(params)}"
+    
     if not client:
-        from urllib.parse import urlencode
-        params = {
-            "client_id": CLIENT_ID,
-            "redirect_uri": REDIRECT_URI,
-            "response_type": "code",
-            "scope": " ".join(SCOPES),
-            "state": "dashboard"
-        }
-        auth_url = f"{AUTH_URL}?{urlencode(params)}"
         return render_template_string(DASHBOARD_HTML, authenticated=False, auth_url=auth_url)
     
     try:
@@ -2115,6 +2130,17 @@ def index():
             updated_at=datetime.now().strftime("%H:%M")
         )
         
+    except requests.exceptions.HTTPError as e:
+        # If 401, clear tokens and redirect to login
+        if e.response and e.response.status_code == 401:
+            try:
+                import os
+                os.remove(".whoop_tokens.json")
+            except:
+                pass
+            return render_template_string(DASHBOARD_HTML, authenticated=False, auth_url=auth_url)
+        import traceback
+        return f"<pre>{traceback.format_exc()}</pre>", 500
     except Exception as e:
         import traceback
         return f"<pre>{traceback.format_exc()}</pre>", 500
