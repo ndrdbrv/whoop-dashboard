@@ -752,6 +752,45 @@ DASHBOARD_HTML = """
         }
         
         /* Planned Workout */
+        /* Warmup Card */
+        .warmup-card {
+            background: rgba(251, 146, 60, 0.08);
+            border: 1px solid rgba(251, 146, 60, 0.15);
+            border-radius: 16px;
+            padding: 18px;
+        }
+        
+        .warmup-header {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fb923c;
+            margin-bottom: 12px;
+        }
+        
+        .warmup-exercises {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .warmup-exercise {
+            background: rgba(251, 146, 60, 0.1);
+            border: 1px solid rgba(251, 146, 60, 0.2);
+            border-radius: 20px;
+            padding: 8px 14px;
+            font-size: 13px;
+            color: #fdba74;
+        }
+        
+        .warmup-tip {
+            font-size: 12px;
+            color: var(--white-40);
+            font-style: italic;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        
         .planned-card {
             background: rgba(96, 165, 250, 0.08);
             border: 1px solid rgba(96, 165, 250, 0.15);
@@ -1056,6 +1095,7 @@ DASHBOARD_HTML = """
         const exerciseDB = {
             categories: [
                 { id: "warmup", name: "Warmup", exercises: ["Dynamic Stretching", "Static Stretching", "Foam Rolling", "Arm Circles", "Leg Swings", "Hip Circles", "Shoulder Rolls", "Neck Rotations", "Wrist Rotations", "Ankle Rotations", "Jumping Jacks", "High Knees", "Butt Kicks", "World Greatest Stretch", "Cat Cow", "Child Pose", "Downward Dog", "Inchworm", "Band Pull Apart Warmup", "Light Jog"] },
+                { id: "climbing_warmup", name: "Climbing Warmup", exercises: ["Finger Flicks", "Wrist Circles", "Forearm Stretch", "Prayer Stretch", "Reverse Prayer Stretch", "Finger Extensions with Band", "Rice Bucket", "Tendon Glides", "Scapular Push Ups", "Easy Traverse", "Jug Ladder", "Easy Boulders V0-V2", "Pull Up Hang", "Shoulder Shrugs on Bar", "Arm Swings", "Elbow Circles", "Hip Opener Squats", "Deep Squat Hold", "Ankle Mobility", "Light Fingerboard - Open Hand", "Light Fingerboard - Half Crimp"] },
                 { id: "lower_compound", name: "Lower Body - Compound", exercises: ["Back Squat", "Front Squat", "Goblet Squat", "Box Squat", "Forward Lunge", "Reverse Lunge", "Walking Lunge", "Bulgarian Split Squat", "Conventional Deadlift", "Sumo Deadlift", "Romanian Deadlift", "Trap Bar Deadlift", "Step Up", "Lateral Step Up"] },
                 { id: "lower_isolation", name: "Lower Body - Isolation", exercises: ["Leg Extension", "Lying Hamstring Curl", "Seated Hamstring Curl", "Hip Thrust", "Glute Bridge", "Single Leg Hip Thrust", "Standing Calf Raise", "Seated Calf Raise", "Hip Adduction Machine", "Hip Abduction Machine"] },
                 { id: "upper_push", name: "Upper Body - Push", exercises: ["Bench Press", "Incline Bench Press", "Decline Bench Press", "Dumbbell Bench Press", "Push Up", "Floor Press", "Close Grip Bench Press", "Dip", "Overhead Press", "Push Press", "Arnold Press", "Dumbbell Fly", "Cable Fly", "Pec Deck"] },
@@ -1354,6 +1394,36 @@ DASHBOARD_HTML = """
         
         document.addEventListener('DOMContentLoaded', showPlannedWorkout);
         
+        // Daily Warmup - rotates based on day
+        const climbingWarmups = [
+            { exercises: ["Finger Flicks", "Wrist Circles", "Forearm Stretch", "Easy Traverse"], tip: "Focus on blood flow before touching holds" },
+            { exercises: ["Prayer Stretch", "Reverse Prayer", "Scapular Push Ups", "Jug Ladder"], tip: "Open up the shoulders and activate scapula" },
+            { exercises: ["Rice Bucket", "Tendon Glides", "Pull Up Hang", "Easy Boulders V0-V2"], tip: "Finger health day - go slow on crimps" },
+            { exercises: ["Hip Opener Squats", "Deep Squat Hold", "Arm Swings", "Light Traverse"], tip: "Lower body mobility for better footwork" },
+            { exercises: ["Finger Extensions with Band", "Shoulder Shrugs", "Elbow Circles", "Easy Overhang"], tip: "Antagonist work to prevent injury" },
+            { exercises: ["Ankle Mobility", "Cat Cow", "Thread the Needle", "Slab Climbing"], tip: "Balance and body awareness focus" },
+            { exercises: ["Forearm Massage", "Finger Rolls", "Light Hangboard Open", "Volume Boulders"], tip: "Recovery day warmup - keep it light" }
+        ];
+        
+        function showDailyWarmup() {
+            const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+            const warmup = climbingWarmups[dayOfYear % climbingWarmups.length];
+            
+            const container = document.getElementById('dailyWarmup');
+            const tipEl = document.getElementById('warmupTip');
+            
+            if (container) {
+                container.innerHTML = warmup.exercises.map(ex => 
+                    '<span class="warmup-exercise">' + ex + '</span>'
+                ).join('');
+            }
+            if (tipEl) {
+                tipEl.textContent = '💡 ' + warmup.tip;
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', showDailyWarmup);
+        
         function toggleHistory() {
             const historyDiv = document.getElementById('logHistory');
             const btnText = document.getElementById('historyBtnText');
@@ -1447,6 +1517,16 @@ DASHBOARD_HTML = """
             <span>{{ warning }}</span>
         </div>
         {% endfor %}
+        
+        <!-- Daily Warmup -->
+        <div class="section">
+            <div class="section-title">Today's Warmup</div>
+            <div class="warmup-card">
+                <div class="warmup-header">🔥 Try These Today</div>
+                <div class="warmup-exercises" id="dailyWarmup"></div>
+                <div class="warmup-tip" id="warmupTip"></div>
+            </div>
+        </div>
         
         <!-- Planned Workout -->
         <div class="section" id="plannedSection" style="display: none;">
