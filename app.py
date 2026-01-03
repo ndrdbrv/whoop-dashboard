@@ -1403,7 +1403,8 @@ DASHBOARD_HTML = """
                 // Show AI note if enabled
                 const aiEnabled = localStorage.getItem('aiCoachEnabled') === 'true';
                 if (aiEnabled) {
-                    const recovery = parseInt('{{ recovery_score }}') || 50;
+                    const recoveryEl = document.getElementById('recoveryScore');
+                    const recovery = recoveryEl ? parseInt(recoveryEl.dataset.value) || 50 : 50;
                     let note = '';
                     
                     if (recovery >= 67) {
@@ -1548,7 +1549,7 @@ DASHBOARD_HTML = """
         <div class="header">
             <div class="header-date">{{ current_date }}</div>
             <div class="header-label">{{ user_name }}</div>
-            <div class="score {{ score_color }}">{{ recovery_score }}</div>
+            <div class="score {{ score_color }}" id="recoveryScore" data-value="{{ recovery_score }}">{{ recovery_score }}</div>
             <div class="score-label">Recovery</div>
             <div class="status">{{ intensity }} day</div>
         </div>
