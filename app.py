@@ -208,29 +208,35 @@ DASHBOARD_HTML = """
         .metrics {
             display: flex;
             justify-content: center;
-            gap: 56px;
-            padding: 40px 0;
-            border-top: 1px solid rgba(255,255,255,0.04);
-            border-bottom: 1px solid rgba(255,255,255,0.04);
-            margin-bottom: 56px;
+            gap: 16px;
+            padding: 24px 0 40px;
+            margin-bottom: 40px;
         }
         
         .metric {
-            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 16px 24px;
+            min-width: 80px;
+            backdrop-filter: blur(10px);
         }
         
         .metric-value {
-            font-size: 28px;
-            font-weight: 300;
+            font-size: 24px;
+            font-weight: 400;
             color: var(--white);
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             letter-spacing: -0.02em;
         }
         
         .metric-label {
-            font-size: 9px;
+            font-size: 10px;
             font-weight: 500;
-            letter-spacing: 0.15em;
+            letter-spacing: 0.12em;
             text-transform: uppercase;
             color: var(--white-20);
         }
@@ -481,96 +487,6 @@ DASHBOARD_HTML = """
             font-size: 13px;
             color: var(--white-40);
             line-height: 1.6;
-        }
-        
-        /* Activity */
-        .day-group {
-            margin-bottom: 20px;
-        }
-        
-        .day-group-header {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--white-40);
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            margin-bottom: 10px;
-            padding-left: 4px;
-        }
-        
-        .activity-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        
-        .activity-card {
-            background: rgba(20,20,22,0.85);
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 16px;
-            padding: 14px 16px;
-        }
-        
-        .activity-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 12px;
-        }
-        
-        .activity-icon {
-            font-size: 24px;
-        }
-        
-        .activity-info {
-            flex: 1;
-        }
-        
-        .activity-name {
-            font-size: 15px;
-            font-weight: 500;
-            color: var(--white);
-            margin-bottom: 2px;
-        }
-        
-        .activity-time {
-            font-size: 12px;
-            color: var(--white-40);
-        }
-        
-        .activity-strain-badge {
-            font-size: 16px;
-            font-weight: 600;
-            color: #60a5fa;
-            background: rgba(96, 165, 250, 0.1);
-            padding: 6px 12px;
-            border-radius: 20px;
-        }
-        
-        .activity-stats {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            padding-top: 12px;
-            border-top: 1px solid rgba(255,255,255,0.06);
-        }
-        
-        .activity-stat {
-            text-align: center;
-        }
-        
-        .stat-value {
-            display: block;
-            font-size: 16px;
-            font-weight: 500;
-            color: var(--white);
-        }
-        
-        .stat-label {
-            font-size: 10px;
-            color: var(--white-40);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
         }
         
         /* Sleep Card */
@@ -853,6 +769,24 @@ DASHBOARD_HTML = """
             color: white;
         }
         
+        .ex-select-wide {
+            width: 100%;
+            padding: 14px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            color: var(--white);
+            font-size: 14px;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+        
+        .ex-select-wide option {
+            background: #1a1a1a;
+            color: white;
+        }
+        
         .ex-input-wide {
             width: 100%;
             padding: 14px;
@@ -890,7 +824,7 @@ DASHBOARD_HTML = """
         }
         
         .ex-input::placeholder { color: var(--white-20); }
-        .ex-input:focus, .ex-select:focus, .ex-input-wide:focus { outline: none; border-color: rgba(255,255,255,0.2); }
+        .ex-input:focus, .ex-select:focus, .ex-input-wide:focus, .ex-select-wide:focus { outline: none; border-color: rgba(255,255,255,0.2); }
         
         .add-exercise-btn {
             width: 100%;
@@ -1079,7 +1013,8 @@ DASHBOARD_HTML = """
         
         @media (max-width: 380px) {
             .score { font-size: 88px; }
-            .metrics { gap: 24px; }
+            .metrics { gap: 12px; flex-wrap: wrap; }
+            .metric { padding: 12px 18px; min-width: 70px; }
             .week { gap: 4px; }
             .day { padding: 12px 0; border-radius: 8px; }
             .calendar-row { flex-direction: column; }
@@ -1169,29 +1104,49 @@ DASHBOARD_HTML = """
         
         function updateExercises() {
             const catId = document.getElementById('categorySelect').value;
-            const dataList = document.getElementById('exerciseOptions');
-            const input = document.getElementById('exerciseInput');
-            dataList.innerHTML = '';
-            input.value = '';
+            const select = document.getElementById('exerciseSelect');
+            select.innerHTML = '<option value="">Select exercise...</option>';
             
+            // Hide custom input when category changes
+            document.getElementById('customExerciseRow').style.display = 'none';
+            document.getElementById('customExerciseInput').value = '';
+            
+            let exercises = [];
             if (!catId) {
                 // Show all exercises
                 exerciseDB.categories.forEach(cat => {
-                    cat.exercises.forEach(ex => {
-                        const opt = document.createElement('option');
-                        opt.value = ex;
-                        dataList.appendChild(opt);
-                    });
+                    cat.exercises.forEach(ex => exercises.push(ex));
                 });
             } else {
                 const cat = exerciseDB.categories.find(c => c.id === catId);
                 if (cat) {
-                    cat.exercises.forEach(ex => {
-                        const opt = document.createElement('option');
-                        opt.value = ex;
-                        dataList.appendChild(opt);
-                    });
+                    exercises = cat.exercises;
                 }
+            }
+            
+            // Sort and add exercises
+            exercises.sort().forEach(ex => {
+                const opt = document.createElement('option');
+                opt.value = ex;
+                opt.textContent = ex;
+                select.appendChild(opt);
+            });
+            
+            // Add "Other" option at the end
+            const otherOpt = document.createElement('option');
+            otherOpt.value = '__custom__';
+            otherOpt.textContent = '+ Custom exercise...';
+            select.appendChild(otherOpt);
+        }
+        
+        function onExerciseSelect() {
+            const select = document.getElementById('exerciseSelect');
+            const customRow = document.getElementById('customExerciseRow');
+            if (select.value === '__custom__') {
+                customRow.style.display = 'block';
+                document.getElementById('customExerciseInput').focus();
+            } else {
+                customRow.style.display = 'none';
             }
         }
         
@@ -1208,7 +1163,9 @@ DASHBOARD_HTML = """
         }
         
         function addExercise() {
-            const exercise = document.getElementById('exerciseInput').value.trim();
+            const selectVal = document.getElementById('exerciseSelect').value;
+            const customVal = document.getElementById('customExerciseInput').value.trim();
+            const exercise = selectVal === '__custom__' ? customVal : selectVal;
             const weight = document.getElementById('weightInput').value;
             const sets = document.getElementById('setsInput').value;
             const reps = document.getElementById('repsInput').value;
@@ -1216,7 +1173,7 @@ DASHBOARD_HTML = """
             const tempo = document.getElementById('tempoSelect').value;
             const notes = document.getElementById('notesInput').value;
             
-            if (!exercise) { alert('Enter an exercise'); return; }
+            if (!exercise) { alert('Select or enter an exercise'); return; }
             
             const logs = JSON.parse(localStorage.getItem('exerciseLogs') || '{}');
             if (!logs[today]) logs[today] = { exercises: [], notes: '' };
@@ -1235,7 +1192,9 @@ DASHBOARD_HTML = """
             localStorage.setItem('exerciseLogs', JSON.stringify(logs));
             
             // Clear inputs
-            document.getElementById('exerciseInput').value = '';
+            document.getElementById('exerciseSelect').value = '';
+            document.getElementById('customExerciseInput').value = '';
+            document.getElementById('customExerciseRow').style.display = 'none';
             document.getElementById('weightInput').value = '';
             document.getElementById('setsInput').value = '';
             document.getElementById('repsInput').value = '';
@@ -1606,8 +1565,12 @@ DASHBOARD_HTML = """
                     </select>
                 </div>
                 <div class="exercise-row">
-                    <input type="text" id="exerciseInput" class="ex-input-wide" list="exerciseOptions" placeholder="Select or type exercise...">
-                    <datalist id="exerciseOptions"></datalist>
+                    <select id="exerciseSelect" class="ex-select-wide" onchange="onExerciseSelect()">
+                        <option value="">Select exercise...</option>
+                    </select>
+                </div>
+                <div class="exercise-row" id="customExerciseRow" style="display: none;">
+                    <input type="text" id="customExerciseInput" class="ex-input-wide" placeholder="Enter custom exercise...">
                 </div>
                 <div class="exercise-row exercise-row-3">
                     <div class="ex-field">
@@ -1753,47 +1716,6 @@ DASHBOARD_HTML = """
                     </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="section">
-            <div class="section-title">Recent Workouts</div>
-            {% for date_key, day_data in recent_days %}
-            <div class="day-group">
-                <div class="day-group-header">{{ day_data.date }}</div>
-                <div class="activity-list">
-                    {% for activity in day_data.activities %}
-                    <div class="activity-card">
-                        <div class="activity-header">
-                            <span class="activity-icon">{{ activity.icon }}</span>
-                            <div class="activity-info">
-                                <div class="activity-name">{{ activity.name }}</div>
-                                <div class="activity-time">{{ activity.time }}</div>
-                            </div>
-                            <div class="activity-strain-badge">{{ activity.strain }}</div>
-                        </div>
-                        <div class="activity-stats">
-                            <div class="activity-stat">
-                                <span class="stat-value">{{ activity.duration }}</span>
-                                <span class="stat-label">min</span>
-                            </div>
-                            <div class="activity-stat">
-                                <span class="stat-value">{{ activity.max_hr }}</span>
-                                <span class="stat-label">max HR</span>
-                            </div>
-                            <div class="activity-stat">
-                                <span class="stat-value">{{ activity.avg_hr }}</span>
-                                <span class="stat-label">avg HR</span>
-                            </div>
-                            <div class="activity-stat">
-                                <span class="stat-value">{{ activity.calories }}</span>
-                                <span class="stat-label">kcal</span>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-            {% endfor %}
         </div>
         
         {% if sleep_stages %}
@@ -2012,65 +1934,6 @@ def index():
                 "rhr": rhr_val
             })
         
-        # Group activities by date
-        activities_by_date = {}
-        for w in workouts_data[:15]:  # Get more workouts for history
-            if w.get("score_state") == "SCORED" and w.get("score"):
-                sport = w.get("sport_name", "activity")
-                # Clean up the sport name - only show "General Activity" if truly generic
-                sport_clean = sport.replace("_", " ").strip()
-                if sport_clean.lower() in ["activity", "other", "functional fitness", ""]:
-                    sport_clean = "General Activity"
-                elif "sauna" in sport_clean.lower():
-                    sport_clean = "Sauna"
-                elif "heat" in sport_clean.lower():
-                    sport_clean = "Sauna"
-                else:
-                    sport_clean = sport_clean.title()
-                
-                score = w["score"]
-                strain = round(score.get("strain", 0), 1)
-                max_hr = score.get("max_heart_rate", 0)
-                avg_hr = score.get("average_heart_rate", 0)
-                calories = round(score.get("kilojoule", 0) / 4.184)
-                
-                start = datetime.fromisoformat(w["start"].replace("Z", "+00:00"))
-                end = datetime.fromisoformat(w["end"].replace("Z", "+00:00"))
-                duration_mins = int((end - start).total_seconds() / 60)
-                
-                date_key = start.strftime("%Y-%m-%d")
-                date_display = start.strftime("%a, %b %d")
-                workout_time = start.strftime("%H:%M")
-                
-                icon = "💪"
-                sport_lower = sport_clean.lower()
-                if "climb" in sport_lower or "boulder" in sport_lower: icon = "🧗"
-                elif "run" in sport_lower: icon = "🏃"
-                elif "functional" in sport_lower or "fitness" in sport_lower or "weight" in sport_lower or "strength" in sport_lower: icon = "🏋️"
-                elif "sauna" in sport_lower or "heat" in sport_lower: icon = "🧖"
-                elif "cycling" in sport_lower or "bike" in sport_lower: icon = "🚴"
-                elif "swim" in sport_lower: icon = "🏊"
-                elif "yoga" in sport_lower or "stretching" in sport_lower: icon = "🧘"
-                elif "walk" in sport_lower or "hike" in sport_lower: icon = "🚶"
-                
-                activity = {
-                    "icon": icon, 
-                    "name": sport_clean[:20], 
-                    "strain": strain,
-                    "duration": duration_mins,
-                    "max_hr": max_hr,
-                    "avg_hr": avg_hr,
-                    "calories": calories,
-                    "time": workout_time
-                }
-                
-                if date_key not in activities_by_date:
-                    activities_by_date[date_key] = {"date": date_display, "activities": []}
-                activities_by_date[date_key]["activities"].append(activity)
-        
-        # Convert to list sorted by date (newest first)
-        recent_days = sorted(activities_by_date.items(), key=lambda x: x[0], reverse=True)[:5]
-        
         # Get sleep stages from latest sleep
         sleep_stages = None
         if sleep_data and len(sleep_data) > 0:
@@ -2125,7 +1988,6 @@ def index():
             warnings=recommendation.warnings,
             weekly_recovery=weekly_recovery,
             weekly_suggestion=weekly.get("suggestion", ""),
-            recent_days=recent_days,
             sleep_stages=sleep_stages,
             current_date=datetime.now().strftime("%A, %B %d"),
             updated_at=datetime.now().strftime("%H:%M")
