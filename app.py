@@ -216,17 +216,15 @@ DASHBOARD_HTML = """
         
         .status {
             display: inline-block;
-            margin-top: 32px;
-            padding: 10px 24px;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.08);
+            margin-top: 16px;
+            padding: 8px 20px;
+            background: rgba(0,0,0,0.3);
             border-radius: 100px;
             font-size: 11px;
             font-weight: 500;
             letter-spacing: 0.12em;
             text-transform: uppercase;
             color: var(--white-60);
-            backdrop-filter: blur(10px);
         }
         
         /* Metrics */
@@ -1538,8 +1536,8 @@ DASHBOARD_HTML = """
             <div class="recovery-pill {{ score_color }}">
                 <div class="score" id="recoveryScore" data-value="{{ recovery_score }}">{{ recovery_score }}</div>
                 <div class="score-label">Recovery</div>
+                <div class="status">{{ intensity }} day</div>
             </div>
-            <div class="status">{{ intensity }} day</div>
         </div>
         
         <div class="metrics">
