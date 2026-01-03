@@ -1453,11 +1453,10 @@ DASHBOARD_HTML = """
             }
         }
         
-        function copyWorkout(text) {
-            const decoded = text.replace(/\\n/g, '\n');
-            navigator.clipboard.writeText(decoded).then(() => {
-                // Show brief feedback
-                const btn = event.target;
+        function copyWorkoutData(btn) {
+            const encoded = btn.getAttribute('data-copy');
+            const text = decodeURIComponent(escape(atob(encoded)));
+            navigator.clipboard.writeText(text).then(() => {
                 const original = btn.textContent;
                 btn.textContent = '✓ Copied!';
                 btn.style.background = 'rgba(34, 197, 94, 0.2)';
@@ -1494,19 +1493,22 @@ DASHBOARD_HTML = """
                     return line;
                 }).join('<br>');
                 
-                // Create copyable text format
-                const copyText = '🏋️ ' + formatted + '\\n' + log.exercises.map(ex => {
+                // Create copyable text format - store in data attribute to avoid escaping issues
+                const copyLines = ['🏋️ ' + formatted];
+                log.exercises.forEach(ex => {
                     let line = '• ' + formatExerciseName(ex.name);
                     if (ex.weight) line += ' ' + ex.weight + 'kg';
                     if (ex.sets && ex.reps) line += ' ' + ex.sets + 'x' + ex.reps;
                     if (ex.rpe) line += ' (RPE ' + ex.rpe + ')';
-                    return line;
-                }).join('\\n') + (log.notes ? '\\n📝 ' + log.notes : '');
+                    copyLines.push(line);
+                });
+                if (log.notes) copyLines.push('📝 ' + log.notes);
+                const copyData = btoa(unescape(encodeURIComponent(copyLines.join('\n'))));
                 
                 return '<div class="log-history-item">' +
                     '<div style="display: flex; justify-content: space-between; align-items: center;">' +
                     '<div class="log-history-date">' + formatted + ' (' + log.exercises.length + ' exercises)</div>' +
-                    '<button class="btn-copy" onclick="copyWorkout(\'' + copyText.replace(/'/g, "\\'") + '\')">📋 Copy</button>' +
+                    '<button class="btn-copy" data-copy="' + copyData + '" onclick="copyWorkoutData(this)">📋 Copy</button>' +
                     '</div>' +
                     '<div class="log-history-text">' + exerciseList + (log.notes ? '<br><em>' + log.notes + '</em>' : '') + '</div>' +
                 '</div>';
