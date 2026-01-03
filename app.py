@@ -169,23 +169,48 @@ DASHBOARD_HTML = """
             margin-bottom: 40px;
         }
         
-        .score {
-            font-size: 140px;
-            font-weight: 200;
-            letter-spacing: -0.05em;
-            line-height: 0.9;
-            margin-bottom: 12px;
+        .recovery-pill {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 32px;
+            padding: 32px 48px;
+            margin: 20px 0;
+            backdrop-filter: blur(10px);
         }
         
-        .score.green { color: #4ade80; }
-        .score.yellow { color: #fbbf24; }
-        .score.red { color: #f87171; }
+        .recovery-pill.green { 
+            background: rgba(74, 222, 128, 0.08);
+            border-color: rgba(74, 222, 128, 0.2);
+        }
+        .recovery-pill.yellow { 
+            background: rgba(251, 191, 36, 0.08);
+            border-color: rgba(251, 191, 36, 0.2);
+        }
+        .recovery-pill.red { 
+            background: rgba(248, 113, 113, 0.08);
+            border-color: rgba(248, 113, 113, 0.2);
+        }
+        
+        .score {
+            font-size: 120px;
+            font-weight: 200;
+            letter-spacing: -0.05em;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+        
+        .recovery-pill.green .score { color: #4ade80; }
+        .recovery-pill.yellow .score { color: #fbbf24; }
+        .recovery-pill.red .score { color: #f87171; }
         
         .score-label {
-            font-size: 14px;
-            font-weight: 300;
+            font-size: 12px;
+            font-weight: 400;
             color: var(--white-40);
-            letter-spacing: 0.1em;
+            letter-spacing: 0.15em;
             text-transform: uppercase;
         }
         
@@ -1012,9 +1037,10 @@ DASHBOARD_HTML = """
         }
         
         @media (max-width: 380px) {
-            .score { font-size: 88px; }
-            .metrics { gap: 12px; flex-wrap: wrap; }
-            .metric { padding: 12px 18px; min-width: 70px; }
+            .score { font-size: 72px; }
+            .recovery-pill { padding: 24px 36px; border-radius: 24px; }
+            .metrics { gap: 10px; flex-wrap: wrap; }
+            .metric { padding: 12px 16px; min-width: 65px; }
             .week { gap: 4px; }
             .day { padding: 12px 0; border-radius: 8px; }
             .calendar-row { flex-direction: column; }
@@ -1314,6 +1340,7 @@ DASHBOARD_HTML = """
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             initExerciseDB();
+            updateExercises();  // Populate exercise dropdown on load
             loadLogsFromServer();  // Load from server first, then render
             renderExerciseList();
             loadWorkoutNotes();
@@ -1508,8 +1535,10 @@ DASHBOARD_HTML = """
         <div class="header">
             <div class="header-date">{{ current_date }}</div>
             <div class="header-label">{{ user_name }}</div>
-            <div class="score {{ score_color }}" id="recoveryScore" data-value="{{ recovery_score }}">{{ recovery_score }}</div>
-            <div class="score-label">Recovery</div>
+            <div class="recovery-pill {{ score_color }}">
+                <div class="score" id="recoveryScore" data-value="{{ recovery_score }}">{{ recovery_score }}</div>
+                <div class="score-label">Recovery</div>
+            </div>
             <div class="status">{{ intensity }} day</div>
         </div>
         
