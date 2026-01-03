@@ -1517,7 +1517,7 @@ DASHBOARD_HTML = """
                     copyLines.push(line);
                 });
                 if (log.notes) copyLines.push('📝 ' + log.notes);
-                const copyData = btoa(unescape(encodeURIComponent(copyLines.join('\n'))));
+                const copyData = btoa(unescape(encodeURIComponent(copyLines.join('\\n'))));
                 
                 return '<div class="log-history-item">' +
                     '<div style="display: flex; justify-content: space-between; align-items: center;">' +
