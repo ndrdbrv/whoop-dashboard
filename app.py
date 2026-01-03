@@ -678,6 +678,16 @@ DASHBOARD_HTML = """
             transform: scale(0.98);
         }
         
+        .login-quote {
+            margin-top: 48px;
+            font-size: 13px;
+            font-style: italic;
+            color: var(--white-40);
+            max-width: 280px;
+            line-height: 1.6;
+            letter-spacing: 0.02em;
+        }
+        
         /* Warning */
         .warning {
             background: rgba(255,59,48,0.1);
@@ -1522,6 +1532,7 @@ DASHBOARD_HTML = """
         <h1 class="login-title">Training Dashboard</h1>
         <p class="login-subtitle">Connect your WHOOP, load in your workouts, and let's ascend in 2026 together.</p>
         <a href="{{ auth_url }}" class="login-btn">Connect WHOOP</a>
+        <p class="login-quote">Throw yourself into something so demanding, that distraction becomes impossible.</p>
     </div>
     {% else %}
     <div class="mountain-bg"></div>
