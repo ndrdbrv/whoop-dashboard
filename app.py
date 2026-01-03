@@ -827,6 +827,22 @@ DASHBOARD_HTML = """
             background: rgba(96, 165, 250, 0.25);
         }
         
+        .save-workout-btn {
+            width: 100%;
+            margin-top: 16px;
+            padding: 16px;
+            font-size: 15px;
+            font-weight: 500;
+            background: rgba(74, 222, 128, 0.1);
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            color: #4ade80;
+            transition: all 0.2s;
+        }
+        
+        .save-workout-btn:hover {
+            background: rgba(74, 222, 128, 0.2);
+        }
+        
         .optional-toggle {
             font-size: 12px;
             color: var(--white-40);
@@ -1164,13 +1180,33 @@ DASHBOARD_HTML = """
             }).join('');
         }
         
-        function saveWorkoutNotes() {
+        function saveWorkout() {
             const notes = document.getElementById('workoutNotes').value;
             const logs = JSON.parse(localStorage.getItem('exerciseLogs') || '{}');
-            if (!logs[today]) logs[today] = { exercises: [], notes: '' };
+            
+            if (!logs[today] || !logs[today].exercises || logs[today].exercises.length === 0) {
+                alert('Add at least one exercise before saving');
+                return;
+            }
+            
             logs[today].notes = notes;
+            logs[today].savedAt = new Date().toLocaleTimeString('en-US', {hour: '2-digit', minute: '2-digit'});
             localStorage.setItem('exerciseLogs', JSON.stringify(logs));
-            alert('Notes saved!');
+            
+            // Show success feedback
+            const btn = document.querySelector('.save-workout-btn');
+            const originalText = btn.textContent;
+            btn.textContent = '✓ Workout Saved!';
+            btn.style.background = 'rgba(74, 222, 128, 0.2)';
+            btn.style.borderColor = 'rgba(74, 222, 128, 0.4)';
+            btn.style.color = '#4ade80';
+            
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.background = '';
+                btn.style.borderColor = '';
+                btn.style.color = '';
+            }, 2000);
         }
         
         function loadWorkoutNotes() {
@@ -1409,7 +1445,7 @@ DASHBOARD_HTML = """
                 
                 <!-- Workout Notes -->
                 <textarea id="workoutNotes" class="ex-notes" placeholder="Workout notes (optional)..." style="margin-top: 12px;"></textarea>
-                <button class="btn" style="margin-top: 12px;" onclick="saveWorkoutNotes()">Save Notes</button>
+                <button class="btn save-workout-btn" onclick="saveWorkout()">Save Workout</button>
             </div>
             
             <!-- Past Logs -->
